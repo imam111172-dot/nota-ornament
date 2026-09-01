@@ -74,21 +74,26 @@ Syarat: HP dan laptop tersambung ke WiFi yang sama.
                        -> Salin / WhatsApp / Cetak.
 
 
-  TIGA STATUS PEMBAYARAN DI KASIR
-    LUNAS  : dibayar penuh. Seluruh uang masuk kas hari itu.
+  PEMBAYARAN DI KASIR - CUKUP SATU KOLOM
+    Tidak ada pilihan metode maupun status. Yang ada hanya satu
+    kolom: "Uang muka diterima".
 
-    DP     : bayar sebagian. Isi jumlah uang mukanya, lalu
-             pilih tanggal jatuh tempo pelunasan.
-             -> uang muka langsung masuk kas hari itu
-             -> SISANYA otomatis jadi piutang pelanggan
-             Nota akan mencantumkan "Uang Muka (DP) dibayar"
-             dan "SISA YANG HARUS DIBAYAR".
+    Kolom itu terisi sendiri sebesar total nota, jadi kalau
+    pelanggan membayar penuh, biarkan saja lalu simpan.
 
-    BON    : belum bayar sama sekali. Seluruh nilai nota
-             jadi piutang, tidak ada uang masuk kas.
+    Kalau pelanggan baru membayar sebagian, kecilkan angkanya.
+    Sisanya OTOMATIS jadi hutang pelanggan, dan kolom jatuh
+    tempo muncul sendiri.
 
-    Untuk DP dan BON, nama pelanggan wajib diisi.
+    Dua tombol pintas:
+      "Dibayar lunas" - kembalikan ke jumlah penuh
+      "Belum bayar"   - kosongkan, seluruh nota jadi hutang
 
+    Nama pelanggan wajib diisi bila ada sisa yang belum dibayar.
+    Kalau lunas, boleh dikosongkan - tercatat sebagai "Umum".
+
+    Kas hanya menghitung uang muka yang benar-benar diterima.
+    Nilai penjualan tetap dihitung penuh sejak nota dibuat.
 
   MENERIMA PEMBAYARAN PELANGGAN (boleh dicicil)
     Buka tab "Utang" -> cari namanya -> tombol "Catat Bayar".
@@ -229,14 +234,73 @@ SEBERAPA AMAN SANDI INI
   sembarangan oleh karyawan - bukan pengaman tingkat tinggi.
   JANGAN memakai sandi yang sama dengan sandi bank atau email.
 
-BELUM ADA: JUMLAH STOK
-  Aplikasi ini belum mencatat jumlah persediaan barang, jadi
-  perubahan stok belum bisa masuk log. Yang tercatat baru
-  perubahan data barangnya - terutama harga.
+  Perubahan stok juga tercatat, termasuk yang berkurang sendiri
+  karena penjualan.
 
 
 ========================================
- F. PENTING - DATA ANDA
+ F. STOK BARANG
+========================================
+MENYALAKAN
+  Tab "Katalog" -> saat menambah atau mengubah BARANG, isi
+  "Jumlah stok". Kosongkan bila barang itu tidak perlu dihitung
+  stoknya. Jasa tidak punya stok.
+
+  "Ingatkan bila sisa" dipakai sebagai batas peringatan. Contoh
+  diisi 5: begitu sisa 5 atau kurang, muncul tanda kuning.
+
+BERKURANG SENDIRI
+  Setiap barang yang masuk nota otomatis mengurangi stoknya.
+  Menghapus nota mengembalikan stok itu lagi. Keduanya tercatat
+  di log, lengkap dengan angka sebelum dan sesudah.
+
+  Kalau stok tidak cukup, aplikasi memberi peringatan tetapi
+  penjualan tetap boleh dilanjutkan - stok akan tercatat minus,
+  supaya penjualan nyata tidak terhalang.
+
+MENAMBAH ATAU MENGOREKSI STOK
+  Tab "Katalog" -> tombol "Stok" pada kartu barang.
+    ketik  20   -> menambah 20
+    ketik -3    -> mengurangi 3
+    ketik =50   -> menetapkan langsung jadi 50
+
+
+========================================
+ G. BERBAGI PDF
+========================================
+NOTA PDF
+  Setelah menekan "Simpan & Buat Nota", di bawah teks notanya
+  ada tombol "Bagikan PDF".
+
+  Isinya rapi seperti nota cetak: nama toko, nomor nota,
+  tanggal, nama pelanggan, lalu tabel berkolom No. / Nama
+  Barang-Jasa / Jumlah / Harga / Total, diikuti subtotal,
+  diskon, grand total, uang muka, dan sisa. Ada cap LUNAS
+  atau BELUM LUNAS beserta sisanya.
+
+  Nota lama juga bisa: tab "Kasir" -> Riwayat Nota -> "Lihat"
+  -> "Bagikan PDF".
+
+KATALOG PDF
+  Tab "Katalog" -> "Kirim Katalog PDF".
+
+  Di HP    : langsung muncul pilihan aplikasi, termasuk
+             WhatsApp. Pilih kontak atau grup, kirim.
+  Di laptop: PDF diunduh lebih dulu, lalu Anda lampirkan
+             sendiri ke WhatsApp Web atau email.
+
+Isi PDF-nya: nama toko, kontak, lalu daftar barang dan jasa
+beserta foto, harga, sisa stok, dan penjelasan singkat. Berganti
+halaman otomatis bila itemnya banyak, dan tiap halaman diberi
+nomor serta nomor WhatsApp Anda di bagian bawah.
+
+Foto yang muncul di PDF adalah foto yang Anda unggah lewat tab
+Katalog. Item tanpa foto tetap ikut tercetak, hanya kotaknya
+kosong.
+
+
+========================================
+ H. PENTING - DATA ANDA
 ========================================
 Data tersimpan di dalam browser perangkat yang dipakai, bukan
 di internet. Artinya:

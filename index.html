@@ -110,15 +110,15 @@ button.block{width:100%;margin-top:14px}
 .kartu .aksi button{flex:1;padding:7px 4px;font-size:12px;border-radius:8px}
 
 /* keranjang */
-.krj{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}
-.krj:last-child{border-bottom:0}
-.krj .main{flex:1;min-width:0}
-.krj .nm{font-weight:600;font-size:14px;word-break:break-word}
-.krj .meta{font-size:12px;color:var(--muted)}
-.qty{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)}
-.qty button{border:0;background:transparent;padding:6px 10px;font-size:16px;font-weight:700;line-height:1;border-radius:0}
-.qty span{min-width:30px;text-align:center;font-weight:650;font-size:13.5px;font-variant-numeric:tabular-nums}
-.krj .amt{font-weight:650;font-size:13.5px;min-width:82px;text-align:right;font-variant-numeric:tabular-nums}
+.notaHead,.notaBaris{display:grid;grid-template-columns:18px 1fr 44px 66px 72px 18px;gap:5px;align-items:start}
+.notaHead{font-size:9.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.2px;padding-bottom:7px;border-bottom:1.5px solid var(--line);line-height:1.25}
+.notaBaris{font-size:12px;padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
+.notaBaris:last-child{border-bottom:0}
+.notaHead .ka,.notaBaris .ka{text-align:right}
+.notaBaris .nm{font-weight:600;line-height:1.3;word-break:break-word;font-variant-numeric:normal}
+.notaBaris .sat{font-size:10.5px;color:var(--muted);font-weight:400;margin-top:1px}
+.notaBaris .tot{font-weight:700}
+.notaBaris .hapus{border:0;background:transparent;color:var(--red);font-size:16px;line-height:1;padding:0 2px;cursor:pointer;font-weight:700}
 
 pre.teks{white-space:pre-wrap;word-wrap:break-word;font-size:13.5px;line-height:1.6;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:58vh;overflow:auto;font-family:inherit;margin:0}
 
@@ -127,6 +127,11 @@ nav button{flex:1;min-width:0;border:0;background:transparent;padding:6px 0;bord
 nav button .ic{font-size:17px;line-height:1}
 nav button.on{color:var(--brand);background:var(--brand-soft)}
 
+#nNo{background:var(--brand-soft);font-weight:700;letter-spacing:.4px;color:var(--brand);border-color:transparent}
+.duaKolom input,.duaKolom select{text-align:right;font-weight:650}
+.diskonKotak{display:flex;gap:6px}
+.diskonKotak select{flex:0 0 62px;padding-left:8px;padding-right:2px;text-align:left;font-weight:600}
+.diskonKotak input{flex:1;min-width:0}
 .hide{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13.5px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;max-width:88vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
@@ -207,6 +212,8 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 <section id="tab-kasir">
   <div class="card">
     <h2>🧾 Nota Baru</h2>
+    <label for="nNo">No. Nota</label>
+    <input type="text" id="nNo" readonly>
     <div class="row2">
       <div><label for="nPelanggan">Nama Pelanggan</label>
         <input type="text" id="nPelanggan" list="daftarPelanggan" autocomplete="off" placeholder="Ketik / pilih dari daftar">
@@ -218,49 +225,35 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 
   <div class="card">
     <h2>➕ Pilih Barang &amp; Jasa</h2>
-    <input type="search" id="cariItem" placeholder="🔎 Cari nama barang atau jasa…">
-    <div class="chips">
-      <button data-fk="semua" class="on">Semua</button>
-      <button data-fk="barang">📦 Barang</button>
-      <button data-fk="jasa">🛠️ Jasa</button>
+    <div class="periode">
+      <div>
+        <label for="cariItem">Nama barang atau jasa</label>
+        <input type="text" id="cariItem" list="daftarItem" autocomplete="off" placeholder="Ketik / pilih dari daftar">
+        <datalist id="daftarItem"></datalist>
+      </div>
+      <div style="flex:0 0 92px">
+        <label for="qtyCepat">Jumlah</label>
+        <input type="text" id="qtyCepat" inputmode="decimal" value="0">
+      </div>
     </div>
-    <div id="pilihItem"></div>
+    <div class="note" style="margin-top:6px">Pilih dari daftar yang muncul — barang langsung masuk nota sebanyak jumlah di sebelahnya.</div>
   </div>
 
   <div class="card">
-    <h2>🛒 Isi Nota <span id="krjCount" style="color:var(--muted);font-weight:400"></span></h2>
     <div id="listKeranjang"></div>
 
-    <h3>Diskon</h3>
-    <div class="periode">
-      <div style="flex:0 0 96px">
-        <select id="dTipe"><option value="rp">Rp</option><option value="persen">%</option></select>
-      </div>
-      <div><input type="text" id="dNilai" inputmode="numeric" class="uang" placeholder="0"></div>
-    </div>
-
-    <h3>Pembayaran</h3>
-    <div class="row2">
+    <div class="row2 duaKolom" style="margin-top:16px">
       <div>
-        <label for="nMetode">Metode</label>
-        <select id="nMetode"><option>Tunai</option><option>Transfer</option><option>QRIS</option><option>Kartu Debit</option></select>
+        <label for="nDp">Uang muka (Rp)</label>
+        <input type="text" id="nDp" inputmode="numeric" class="uang" placeholder="0">
       </div>
       <div>
-        <label for="nStatus">Status</label>
-        <select id="nStatus">
-          <option value="tunai">LUNAS — bayar penuh</option>
-          <option value="dp">DP — bayar sebagian</option>
-          <option value="kredit">BON — belum bayar</option>
-        </select>
+        <label for="dNilai">Diskon</label>
+        <div class="diskonKotak">
+          <select id="dTipe"><option value="rp">Rp</option><option value="persen">%</option></select>
+          <input type="text" id="dNilai" inputmode="numeric" class="uang" placeholder="0">
+        </div>
       </div>
-    </div>
-    <div id="nDpBox" class="hide">
-      <label for="nDp">Uang muka / DP diterima (Rp)</label>
-      <input type="text" id="nDp" inputmode="numeric" class="uang" placeholder="0">
-      <div class="note" style="margin-top:6px">DP masuk kas hari ini. Sisanya otomatis jadi piutang pelanggan.</div>
-    </div>
-    <div id="nTempoBox" class="hide">
-      <label for="nTempo">Jatuh tempo pelunasan</label><input type="date" id="nTempo">
     </div>
 
     <div class="stat"><span class="lbl">Subtotal Barang</span><span class="val" id="sBarang">Rp 0</span></div>
@@ -268,8 +261,8 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     <div class="stat"><span class="lbl">Subtotal</span><span class="val" id="sSub">Rp 0</span></div>
     <div class="stat"><span class="lbl">Diskon</span><span class="val neg" id="sDiskon">Rp 0</span></div>
     <div class="stat total"><span class="lbl">GRAND TOTAL</span><span class="val" id="sTotal">Rp 0</span></div>
-    <div class="stat hide" id="rowDp"><span class="lbl">Uang muka (DP)</span><span class="val pos" id="sDp">Rp 0</span></div>
-    <div class="stat hide" id="rowSisa"><span class="lbl">Sisa — jadi piutang</span><span class="val neg" id="sSisa">Rp 0</span></div>
+    <div class="stat" id="rowDp"><span class="lbl">Uang muka diterima</span><span class="val pos" id="sDp">Rp 0</span></div>
+    <div class="stat hide" id="rowSisa"><span class="lbl">Sisa — jadi hutang pelanggan</span><span class="val neg" id="sSisa">Rp 0</span></div>
 
     <div class="btnrow">
       <button class="primary" id="btnSimpanNota">💾 Simpan &amp; Buat Nota</button>
@@ -281,7 +274,8 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     <h2>📄 Nota</h2>
     <pre class="teks" id="hasilNota"></pre>
     <div class="btnrow">
-      <button class="primary" id="btnSalinNota">📋 Salin</button>
+      <button class="primary" id="btnPdfNota">📄 Bagikan PDF</button>
+      <button id="btnSalinNota">📋 Salin</button>
       <button id="btnWaPelanggan" class="hide">💬 Kirim ke Pelanggan</button>
       <button id="btnWaNota">💬 WhatsApp</button>
       <button id="btnCetakNota">🖨️ Cetak</button>
@@ -313,6 +307,16 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
         </div>
       </div>
 
+      <div id="iStokBox">
+        <div class="row2">
+          <div><label for="iStok">Jumlah stok</label>
+            <input type="text" id="iStok" inputmode="decimal" placeholder="Kosongkan bila tidak dilacak"></div>
+          <div><label for="iStokMin">Ingatkan bila sisa</label>
+            <input type="text" id="iStokMin" inputmode="decimal" placeholder="Contoh: 5"></div>
+        </div>
+        <div class="note">Stok berkurang sendiri setiap kali barang masuk nota. Kosongkan bila barang ini tidak perlu dihitung stoknya.</div>
+      </div>
+
       <label for="iDesc">Penjelasan singkat (1 kalimat)</label>
       <textarea id="iDesc" rows="2" maxlength="120" placeholder="Contoh: Menjaga mesin tetap dingin dan halus."></textarea>
 
@@ -340,8 +344,10 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 
   <div class="card">
     <h2>📤 Katalog Siap Kirim</h2>
-    <div class="note" style="margin-top:0">Teks katalog format daftar ke bawah, siap ditempel ke WhatsApp atau status.</div>
-    <button class="primary block" id="btnBuatKatalog">Buat Teks Katalog</button>
+    <div class="note" style="margin-top:0">Kirim sebagai PDF berfoto, atau sebagai teks biasa.</div>
+    <button class="primary block" id="btnPdfKatalog">📄 Kirim Katalog PDF</button>
+    <div class="note">Di HP, tombol ini langsung memunculkan pilihan WhatsApp. Di laptop, PDF-nya diunduh lalu Anda lampirkan sendiri.</div>
+    <button class="block" id="btnBuatKatalog">📝 Buat Teks Katalog</button>
     <div class="hide" id="boxKatalog" style="margin-top:12px">
       <pre class="teks" id="hasilKatalog"></pre>
       <div class="btnrow">
@@ -754,6 +760,10 @@ function rp(n){
   const s = Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
   return (neg?"-Rp ":"Rp ") + s;
 }
+/* angka rupiah tanpa awalan "Rp", dipakai pada kolom sempit isi nota */
+function angkaRp(n){
+  return Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+}
 function angka(n){
   const b = Math.round(n*100)/100;
   return (Number.isInteger(b) ? b.toString() : b.toString().replace(".",","));
@@ -1014,7 +1024,7 @@ function keTab(n){
   TABS.forEach(t=>document.getElementById("tab-"+t).classList.toggle("hide", t!==n));
   document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on", b.dataset.tab===n));
   window.scrollTo(0,0);
-  if(n==="kasir")     { gambarPilihItem(); gambarKeranjang(); gambarRiwayatNota(); isiDatalistPelanggan(); }
+  if(n==="kasir")     { gambarKeranjang(); gambarRiwayatNota(); isiDatalistPelanggan(); isiDatalistItem(); segarkanNoNota(); }
   if(n==="katalog")   gambarKatalog();
   if(n==="pelanggan") gambarPelanggan();
   if(n==="kas")       gambarKas();
@@ -1064,6 +1074,9 @@ document.getElementById("formItem").addEventListener("submit", e=>{
     satuan: document.getElementById("iSatuan").value.trim() || "pcs",
     desc: document.getElementById("iDesc").value.trim()
   };
+  const stokMentah = document.getElementById("iStok").value.trim();
+  data.stok    = (data.jenis === "barang" && stokMentah !== "") ? bersihAngka(stokMentah) : null;
+  data.stokMin = (data.jenis === "barang") ? bersihAngka(document.getElementById("iStokMin").value) : 0;
   if(!data.nama || !data.harga){ pesan("Lengkapi nama dan harga"); return; }
   if(id){
     const it = db.katalog.find(x=>x.id===id);
@@ -1073,7 +1086,9 @@ document.getElementById("formItem").addEventListener("submit", e=>{
         beda("Harga", it.harga, data.harga, rp),
         beda("Satuan", it.satuan, data.satuan),
         beda("Jenis", it.jenis, data.jenis),
-        beda("Penjelasan", it.desc, data.desc)
+        beda("Penjelasan", it.desc, data.desc),
+        beda("Stok", it.stok, data.stok, v => (v===null||v===undefined||v==="") ? "tidak dilacak" : angka(v)),
+        beda("Batas ingat", it.stokMin, data.stokMin)
       ].filter(Boolean);
       if(fotoSementara) ubah.push("Foto diganti");
       Object.assign(it, data);
@@ -1082,20 +1097,37 @@ document.getElementById("formItem").addEventListener("submit", e=>{
     }
   }else{
     db.katalog.push(Object.assign({id:uid(), foto: fotoSementara||""}, data));
-    catat("katalog", `Tambah ${data.jenis} "${data.nama}"`, `Harga ${rp(data.harga)} / ${data.satuan}`);
+    catat("katalog", `Tambah ${data.jenis} "${data.nama}"`, `Harga ${rp(data.harga)} / ${data.satuan}` + (data.stok!==null ? ` · stok awal ${angka(data.stok)}` : ""));
   }
   if(simpan()){ pesan("✅ Item tersimpan"); resetFormItem(); gambarKatalog(); }
 });
+
+function aturTampilanStok(){
+  document.getElementById("iStokBox").classList.toggle("hide", document.getElementById("iJenis").value !== "barang");
+}
+document.getElementById("iJenis").addEventListener("change", aturTampilanStok);
 
 function resetFormItem(){
   document.getElementById("formItem").reset();
   document.getElementById("iId").value = "";
   document.getElementById("iSatuan").value = "pcs";
+  aturTampilanStok();
   document.getElementById("fotoPreview").innerHTML = "";
   document.getElementById("fotoInfo").textContent = "Foto otomatis diperkecil agar hemat penyimpanan. Kosongkan bila belum ada.";
   fotoSementara = null;
 }
 document.getElementById("btnBatalItem").addEventListener("click", resetFormItem);
+
+/* stok dilacak hanya bila diisi angka; kosong berarti tidak dihitung */
+const stokDilacak = it => it && it.jenis === "barang" && it.stok !== null && it.stok !== undefined && it.stok !== "";
+const stokNilai   = it => Number(it.stok) || 0;
+function labelStok(it){
+  if(!stokDilacak(it)) return "";
+  const n = stokNilai(it), min = Number(it.stokMin) || 0;
+  if(n <= 0)   return `<span class="tag bad">STOK HABIS</span>`;
+  if(n <= min) return `<span class="tag warn">SISA ${angka(n)} ${esc(it.satuan)}</span>`;
+  return `<span class="tag ok">STOK ${angka(n)} ${esc(it.satuan)}</span>`;
+}
 
 function kartuItem(it){
   return `<div class="kartu">
@@ -1105,15 +1137,18 @@ function kartuItem(it){
     <div class="isi">
       <div class="nm">${esc(it.nama)}</div>
       <div class="hg">${rp(it.harga)} <span style="font-weight:400;color:var(--muted);font-size:11.5px">/ ${esc(it.satuan)}</span></div>
+      ${stokDilacak(it) ? `<div>${labelStok(it)}</div>` : ""}
       ${it.desc ? `<div class="ds">${esc(it.desc)}</div>` : ""}
     </div>
     <div class="aksi">
+      ${stokDilacak(it) ? `<button data-stok="${it.id}">📥 Stok</button>` : ""}
       <button data-ubah="${it.id}">✏️ Ubah</button>
       <button class="danger" data-hapus-item="${it.id}">Hapus</button>
     </div>
   </div>`;
 }
 function gambarKatalog(){
+  isiDatalistItem();                       /* daftar tarik-turun di Kasir ikut segar */
   const B = db.katalog.filter(x=>x.jenis==="barang");
   const J = db.katalog.filter(x=>x.jenis==="jasa");
   document.getElementById("cBarang").textContent = B.length ? `(${B.length})` : "";
@@ -1123,6 +1158,29 @@ function gambarKatalog(){
   document.getElementById("gridJasa").innerHTML = J.length ? J.map(kartuItem).join("")
     : `<div class="kosong" style="grid-column:1/-1">Belum ada jasa. Tambahkan di atas.</div>`;
 
+  document.querySelectorAll("[data-stok]").forEach(b=> b.onclick = ()=>{
+    const it = db.katalog.find(x=>x.id===b.dataset.stok); if(!it) return;
+    const jawab = prompt(
+      `Stok "${it.nama}" sekarang: ${angka(stokNilai(it))} ${it.satuan}
+
+` +
+      `Isi jumlah yang DITAMBAH (contoh: 20)
+` +
+      `Untuk mengurangi, beri tanda minus (contoh: -3)
+` +
+      `Untuk menetapkan langsung, awali "=" (contoh: =50)`, "");
+    if(jawab === null || jawab.trim() === "") return;
+    const teks = jawab.trim();
+    const lama = stokNilai(it);
+    let baru;
+    if(teks.startsWith("=")) baru = bersihAngka(teks.slice(1));
+    else                     baru = lama + bersihAngka(teks);
+    if(baru < 0){ pesan("Stok tidak boleh minus"); return; }
+    it.stok = baru;
+    catat("katalog", `Ubah stok "${it.nama}"`, `${angka(lama)} → ${angka(baru)} ${it.satuan}`);
+    simpan(); gambarKatalog();
+    pesan(`✅ Stok ${it.nama}: ${angka(baru)} ${it.satuan}`);
+  });
   document.querySelectorAll("[data-ubah]").forEach(b=> b.onclick = ()=>{
     const it = db.katalog.find(x=>x.id===b.dataset.ubah); if(!it) return;
     document.getElementById("iId").value = it.id;
@@ -1131,6 +1189,9 @@ function gambarKatalog(){
     isiUang(document.getElementById("iHarga"), it.harga);
     document.getElementById("iSatuan").value = it.satuan;
     document.getElementById("iDesc").value = it.desc||"";
+    document.getElementById("iStok").value = (it.stok===null||it.stok===undefined) ? "" : angka(it.stok);
+    document.getElementById("iStokMin").value = it.stokMin ? angka(it.stokMin) : "";
+    aturTampilanStok();
     fotoSementara = null;
     document.getElementById("fotoPreview").innerHTML = it.foto
       ? `<div class="kartu" style="max-width:180px;margin-top:8px"><div class="foto"><img src="${it.foto}" alt=""></div></div>` : "";
@@ -1144,6 +1205,256 @@ function gambarKatalog(){
     db.katalog = db.katalog.filter(x=>x.id!==b.dataset.hapusItem);
     simpan(); gambarKatalog(); pesan("Item dihapus");
   });
+}
+
+/* ==========================================================
+   PEMBUAT PDF KATALOG
+   Ditulis sendiri tanpa pustaka luar agar aplikasi tetap
+   satu berkas dan tetap jalan tanpa internet.
+   Teks memakai Helvetica bawaan PDF; foto disisipkan apa
+   adanya sebagai JPEG (DCTDecode), jadi tidak perlu diolah lagi.
+   ========================================================== */
+function bytesLatin1(t){
+  const b = new Uint8Array(t.length);
+  for(let i=0;i<t.length;i++) b[i] = t.charCodeAt(i) & 0xFF;
+  return b;
+}
+function gabungBytes(bagian){
+  const arr = bagian.map(x => typeof x === "string" ? bytesLatin1(x) : x);
+  const out = new Uint8Array(arr.reduce((s,a)=>s+a.length, 0));
+  let o = 0; arr.forEach(a => { out.set(a, o); o += a.length; });
+  return out;
+}
+/* Helvetica bawaan PDF memakai WinAnsi — emoji dan tanda khusus dibuang/diganti */
+function keAman(t){
+  return String(t==null ? "" : t)
+    .replace(/[—–]/g, "-").replace(/[“”]/g, '"')
+    .replace(/[‘’]/g, "'").replace(/×/g, "x")
+    .replace(/→/g, "->").replace(/…/g, "...")
+    .replace(/[^\x20-\xFF]/g, "").trim();
+}
+const escPdf = t => keAman(t).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+
+function dataUrlKeBytes(u){
+  const bin = atob(u.slice(u.indexOf(",") + 1));
+  const out = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) out[i] = bin.charCodeAt(i);
+  return out;
+}
+/* ukuran JPEG dibaca dari penanda SOF-nya */
+function dimensiJpeg(b){
+  let i = 2;
+  while(i < b.length - 9){
+    if(b[i] !== 0xFF){ i++; continue; }
+    const m = b[i+1];
+    if(m >= 0xC0 && m <= 0xCF && m !== 0xC4 && m !== 0xC8 && m !== 0xCC)
+      return { h:(b[i+5]<<8)|b[i+6], w:(b[i+7]<<8)|b[i+8] };
+    const len = (b[i+2]<<8)|b[i+3];
+    if(len <= 0) break;
+    i += 2 + len;
+  }
+  return null;
+}
+/* lebar huruf Helvetica ditaksir agar teks bisa dipenggal per baris */
+const lebarTaksir = (t, uk) => keAman(t).length * uk * 0.5;
+function potongBaris(teks, maksLebar, uk, maksBaris){
+  const kata = keAman(teks).split(/\s+/).filter(Boolean);
+  const baris = []; let kini = "";
+  for(const k of kata){
+    const coba = kini ? kini + " " + k : k;
+    if(lebarTaksir(coba, uk) > maksLebar && kini){ baris.push(kini); kini = k; }
+    else kini = coba;
+    if(baris.length >= maksBaris) break;
+  }
+  if(kini && baris.length < maksBaris) baris.push(kini);
+  if(baris.length === maksBaris && kata.length){
+    const sisa = kata.join(" ");
+    if(lebarTaksir(sisa, uk) > maksLebar * maksBaris) baris[maksBaris-1] += "...";
+  }
+  return baris;
+}
+
+/* merangkai daftar objek menjadi berkas PDF utuh */
+function rakitPdf(objs){
+  const potongan = []; let panjang = 0;
+  const tulis = x => { const b = typeof x === "string" ? bytesLatin1(x) : x; potongan.push(b); panjang += b.length; };
+  tulis("%PDF-1.4\n%\xE2\xE3\xCF\xD3\n");
+  const offset = [];
+  objs.forEach((isiObj, i)=>{
+    offset.push(panjang);
+    tulis(`${i+1} 0 obj\n`);
+    (Array.isArray(isiObj) ? isiObj : [isiObj]).forEach(tulis);
+    tulis("\nendobj\n");
+  });
+  const awalXref = panjang;
+  let x = `xref\n0 ${objs.length+1}\n0000000000 65535 f \n`;
+  offset.forEach(o => { x += String(o).padStart(10,"0") + " 00000 n \n"; });
+  x += `trailer\n<< /Size ${objs.length+1} /Root 1 0 R >>\nstartxref\n${awalXref}\n%%EOF\n`;
+  tulis(x);
+  return new Blob([gabungBytes(potongan)], { type: "application/pdf" });
+}
+
+/* di HP memunculkan pilihan aplikasi termasuk WhatsApp; di laptop diunduh */
+async function bagikanPdf(blob, namaBerkas, judul){
+  const berkas = new File([blob], namaBerkas, { type: "application/pdf" });
+  if(navigator.canShare && navigator.canShare({ files: [berkas] })){
+    try{
+      await navigator.share({ files: [berkas], title: judul });
+      pesan("Terkirim");
+      return;
+    }catch(e){
+      if(e.name === "AbortError") return;
+    }
+  }
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = namaBerkas;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  pesan("PDF diunduh - lampirkan ke WhatsApp");
+}
+
+function buatPdfKatalog(){
+  const L = 595.28, T = 841.89, M = 40;          // A4 dan tepinya
+  const LEBAR = L - M*2;
+  const p = db.profil;
+
+  /* --- kumpulkan foto sebagai XObject --- */
+  const gambar = [];                              // {nomorObj, bytes, w, h}
+  const petaGambar = {};                          // id item -> nama XObject
+  db.katalog.forEach(it=>{
+    if(!it.foto || !it.foto.startsWith("data:image/jpeg")) return;
+    const bytes = dataUrlKeBytes(it.foto);
+    const dim = dimensiJpeg(bytes);
+    if(!dim) return;
+    gambar.push({ bytes, w:dim.w, h:dim.h });
+    petaGambar[it.id] = "Im" + gambar.length;
+  });
+
+  const OBJ_IMG_AWAL = 5;                          // 1 Catalog, 2 Pages, 3-4 Font
+  const OBJ_HAL_AWAL = OBJ_IMG_AWAL + gambar.length;
+
+  /* --- susun isi halaman --- */
+  const halaman = [];                              // tiap halaman: array perintah
+  let isi = [], y = 0, dipakai = {};                // dipakai: XObject pada halaman ini
+
+  const halamanBaru = ()=>{
+    if(isi.length) halaman.push({ isi, dipakai });
+    isi = []; dipakai = {}; y = T - M;
+  };
+  const teks = (t, x, yy, uk, tebal, warna)=>{
+    const w = warna || [0.08,0.09,0.12];
+    isi.push(`BT ${w[0].toFixed(3)} ${w[1].toFixed(3)} ${w[2].toFixed(3)} rg ` +
+             `/${tebal ? "F2" : "F1"} ${uk} Tf 1 0 0 1 ${x.toFixed(2)} ${yy.toFixed(2)} Tm (${escPdf(t)}) Tj ET`);
+  };
+  const garis = (yy)=> isi.push(`0.85 0.87 0.90 RG 0.7 w ${M} ${yy.toFixed(2)} m ${(L-M).toFixed(2)} ${yy.toFixed(2)} l S`);
+  const kotak = (x,yy,w,hh,c)=> isi.push(`${c[0]} ${c[1]} ${c[2]} rg ${x.toFixed(2)} ${yy.toFixed(2)} ${w.toFixed(2)} ${hh.toFixed(2)} re f`);
+
+  halamanBaru();
+
+  /* kepala halaman pertama */
+  teks(p.nama || "Katalog", M, y - 22, 19, true, [0.06,0.46,0.43]);
+  y -= 40;
+  teks("KATALOG PRODUK & JASA", M, y, 10, true, [0.42,0.45,0.53]);
+  y -= 14;
+  const kontak = [p.alamat, p.wa ? "WA " + p.wa : "", p.jam].filter(Boolean).join("  |  ");
+  if(kontak){ teks(kontak, M, y, 8.5, false, [0.42,0.45,0.53]); y -= 12; }
+  teks("Dicetak " + tglPanjang(hariIni()) + ". Harga sewaktu-waktu dapat berubah.", M, y, 8, false, [0.55,0.58,0.64]);
+  y -= 16; garis(y); y -= 22;
+
+  const TINGGI_BARIS = 80;
+  const gambarBagian = (judul, arr)=>{
+    if(!arr.length) return;
+    if(y < M + 90) halamanBaru();
+    kotak(M, y - 4, LEBAR, 20, [0.90,0.96,0.95]);
+    teks(judul, M + 8, y + 2, 11, true, [0.06,0.46,0.43]);
+    y -= 34;
+
+    arr.forEach(it=>{
+      if(y - TINGGI_BARIS < M + 26) halamanBaru();
+      const atas = y, fotoH = 62, fotoW = 84;
+
+      const nx = petaGambar[it.id];
+      if(nx){
+        const g = gambar[parseInt(nx.slice(2),10) - 1];
+        const skala = Math.min(fotoW/g.w, fotoH/g.h);
+        const w = g.w*skala, hh = g.h*skala;
+        const gx = M + (fotoW-w)/2, gy = atas - fotoH + (fotoH-hh)/2;
+        isi.push(`q ${w.toFixed(2)} 0 0 ${hh.toFixed(2)} ${gx.toFixed(2)} ${gy.toFixed(2)} cm /${nx} Do Q`);
+        dipakai[nx] = true;
+      }else{
+        kotak(M, atas - fotoH, fotoW, fotoH, [0.90,0.96,0.95]);
+        teks("tanpa foto", M + 18, atas - fotoH/2 - 3, 7.5, false, [0.55,0.58,0.64]);
+      }
+
+      const tx = M + fotoW + 14, tw = LEBAR - fotoW - 14;
+      let ty = atas - 10;
+      teks(it.nama, tx, ty, 11.5, true); ty -= 15;
+      teks(rp(it.harga) + " / " + it.satuan, tx, ty, 11, true, [0.06,0.46,0.43]); ty -= 14;
+      if(stokDilacak(it)){
+        const n = stokNilai(it), min = Number(it.stokMin) || 0;
+        const habis = n <= 0, menipis = !habis && n <= min;
+        teks(habis ? "Stok habis" : (menipis ? "Sisa " + angka(n) + " " + it.satuan + " - segera habis"
+                                             : "Tersedia " + angka(n) + " " + it.satuan),
+             tx, ty, 8.5, false,
+             habis ? [0.72,0.11,0.11] : menipis ? [0.70,0.33,0.04] : [0.08,0.50,0.24]);
+        ty -= 12;
+      }
+      if(it.desc) potongBaris(it.desc, tw, 8.5, 2).forEach(b=>{ teks(b, tx, ty, 8.5, false, [0.41,0.45,0.52]); ty -= 11; });
+
+      y = atas - TINGGI_BARIS;
+      garis(y + 8);
+    });
+    y -= 10;
+  };
+
+  gambarBagian("BARANG", db.katalog.filter(x=>x.jenis==="barang"));
+  gambarBagian("JASA",   db.katalog.filter(x=>x.jenis==="jasa"));
+  halamanBaru();
+
+  /* kaki tiap halaman */
+  halaman.forEach((hal, i)=>{
+    const kaki = (p.wa ? "Pesan: " + p.wa + "   |   " : "") + (p.nama || "");
+    hal.isi.push(`BT 0.55 0.58 0.64 rg /F1 8 Tf 1 0 0 1 ${M} ${M-10} Tm (${escPdf(kaki)}) Tj ET`);
+    hal.isi.push(`BT 0.55 0.58 0.64 rg /F1 8 Tf 1 0 0 1 ${(L-M-46)} ${M-10} Tm (${escPdf("Hal " + (i+1) + " / " + halaman.length)}) Tj ET`);
+  });
+
+  /* --- rakit berkas PDF --- */
+  const objs = [];
+  const nomorHal = halaman.map((_, i)=> OBJ_HAL_AWAL + i*2);
+  objs[0] = `<< /Type /Catalog /Pages 2 0 R >>`;
+  objs[1] = `<< /Type /Pages /Kids [${nomorHal.map(n=>n+" 0 R").join(" ")}] /Count ${halaman.length} >>`;
+  objs[2] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  gambar.forEach((g, i)=>{
+    objs[OBJ_IMG_AWAL - 1 + i] = [
+      `<< /Type /XObject /Subtype /Image /Width ${g.w} /Height ${g.h} /ColorSpace /DeviceRGB ` +
+      `/BitsPerComponent 8 /Filter /DCTDecode /Length ${g.bytes.length} >>\nstream\n`,
+      g.bytes, `\nendstream`
+    ];
+  });
+  halaman.forEach((hal, i)=>{
+    const nHal = nomorHal[i], nIsi = nHal + 1;
+    const xo = Object.keys(hal.dipakai)
+      .map(n => `/${n} ${OBJ_IMG_AWAL + parseInt(n.slice(2),10) - 1} 0 R`).join(" ");
+    objs[nHal-1] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${L.toFixed(2)} ${T.toFixed(2)}] ` +
+      `/Resources << /Font << /F1 3 0 R /F2 4 0 R >>${xo ? ` /XObject << ${xo} >>` : ""} >> ` +
+      `/Contents ${nIsi} 0 R >>`;
+    const aliran = hal.isi.join("\n");
+    objs[nIsi-1] = `<< /Length ${aliran.length} >>\nstream\n${aliran}\nendstream`;
+  });
+
+  return rakitPdf(objs);
+}
+
+async function bagikanPdfKatalog(){
+  if(!db.katalog.length){ pesan("Katalog masih kosong"); return; }
+  let blob;
+  try{ blob = buatPdfKatalog(); }
+  catch(e){ pesan("❌ Gagal membuat PDF: " + e.message); return; }
+
+  const namaBerkas = "Katalog-" + (db.profil.nama || "Toko").replace(/[^A-Za-z0-9]+/g, "-") + ".pdf";
+  await bagikanPdf(blob, namaBerkas, "Katalog " + (db.profil.nama || ""));
 }
 
 function teksKatalog(){
@@ -1171,6 +1482,10 @@ function teksKatalog(){
       t("");
       t(`💰 *${rp(it.harga)}* / ${it.satuan}`);
       t("");
+      if(stokDilacak(it)){
+        t(stokNilai(it) <= 0 ? "⚠️ Stok habis" : `📦 Tersedia ${angka(stokNilai(it))} ${it.satuan}`);
+        t("");
+      }
       if(it.desc){ t(`✨ ${it.desc}`); t(""); }
     });
   };
@@ -1186,6 +1501,7 @@ function teksKatalog(){
   t("Terima kasih 🙏");
   return B.join("\n");
 }
+document.getElementById("btnPdfKatalog").addEventListener("click", bagikanPdfKatalog);
 document.getElementById("btnBuatKatalog").addEventListener("click", ()=>{
   if(!db.katalog.length){ pesan("Katalog masih kosong"); return; }
   document.getElementById("hasilKatalog").textContent = teksKatalog();
@@ -1378,62 +1694,114 @@ document.getElementById("btnWaDaftarPelanggan").addEventListener("click", ()=> k
 /* ==========================================================
    KASIR
    ========================================================== */
-let keranjang = [];
-let filterKat = "semua";
-
-document.querySelectorAll("[data-fk]").forEach(b=> b.addEventListener("click", ()=>{
-  filterKat = b.dataset.fk;
-  document.querySelectorAll("[data-fk]").forEach(x=>x.classList.toggle("on", x===b));
-  gambarPilihItem();
-}));
-document.getElementById("cariItem").addEventListener("input", gambarPilihItem);
-
-function gambarPilihItem(){
-  const q = document.getElementById("cariItem").value.trim().toLowerCase();
-  let L = db.katalog.slice();
-  if(filterKat!=="semua") L = L.filter(x=>x.jenis===filterKat);
-  if(q) L = L.filter(x=>x.nama.toLowerCase().includes(q));
-  document.getElementById("pilihItem").innerHTML = L.length ? L.map(it=>`
-    <div class="item">
-      <div class="main">
-        <div class="nm">${it.jenis==="barang"?"📦":"🛠️"} ${esc(it.nama)}</div>
-        <div class="meta">${rp(it.harga)} / ${esc(it.satuan)}</div>
-      </div>
-      <div class="side"><button class="mini primary" data-tambah="${it.id}">+ Tambah</button></div>
-    </div>`).join("")
-    : `<div class="kosong">${db.katalog.length ? "Tidak ada yang cocok." : "Katalog masih kosong — isi dulu di tab 🛍️ Katalog."}</div>`;
-
-  document.querySelectorAll("[data-tambah]").forEach(b=> b.onclick = ()=>{
-    const it = db.katalog.find(x=>x.id===b.dataset.tambah); if(!it) return;
-    const ada = keranjang.find(x=>x.refId===it.id);
-    if(ada) ada.qty++;
-    else keranjang.push({refId:it.id, nama:it.nama, jenis:it.jenis, satuan:it.satuan, harga:it.harga, qty:1});
-    gambarKeranjang(); pesan("➕ "+it.nama);
+/* arah -1 saat nota dibuat (stok berkurang), +1 saat nota dihapus (stok kembali).
+   Mengembalikan daftar perubahan untuk dicatat di log. */
+function ubahStokDariNota(nota, arah){
+  const jejak = [];
+  (nota.items||[]).forEach(b=>{
+    if(b.jenis !== "barang") return;
+    const it = db.katalog.find(x=>x.id===b.refId);
+    if(!stokDilacak(it)) return;
+    const lama = stokNilai(it);
+    it.stok = lama + arah * (Number(b.qty)||0);
+    jejak.push(`${it.nama} ${angka(lama)}→${angka(it.stok)}`);
   });
+  return jejak;
+}
+
+let keranjang = [];
+
+document.getElementById("cariItem").addEventListener("input", cekPilihanLangsung);
+document.getElementById("cariItem").addEventListener("keydown", e=>{
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  if(cekPilihanLangsung()) return;
+  const q = document.getElementById("cariItem").value.trim().toLowerCase();
+  if(!q){ pesan("Ketik nama barangnya dulu"); return; }
+  const cocok = db.katalog.filter(x => x.nama.toLowerCase().includes(q));
+  if(cocok.length === 1){
+    if(bacaQtyCepat() <= 0){ mintaIsiJumlah(); return; }
+    tambahKeKeranjang(cocok[0].id, bacaQtyCepat());
+    document.getElementById("cariItem").value = "";
+    document.getElementById("qtyCepat").value = "0";
+  }
+  else if(cocok.length === 0){ pesan("Tidak ada yang cocok"); }
+  else { pesan("Masih " + cocok.length + " pilihan — ketik lebih lengkap"); }
+});
+document.getElementById("qtyCepat").addEventListener("keydown", e=>{
+  if(e.key !== "Enter") return;
+  e.preventDefault();
+  /* urutan boleh terbalik: nama dipilih dulu, jumlahnya menyusul */
+  if(!cekPilihanLangsung()) document.getElementById("cariItem").focus();
+});
+
+function bacaQtyCepat(){
+  return bersihAngka(document.getElementById("qtyCepat").value);
+}
+function mintaIsiJumlah(){
+  pesan("Isi jumlahnya dulu");
+  const q = document.getElementById("qtyCepat");
+  q.focus(); q.select();
+}
+function tambahKeKeranjang(id, qty){
+  const it = db.katalog.find(x=>x.id===id); if(!it) return;
+  const jml = (qty && qty > 0) ? qty : 1;
+  const ada = keranjang.find(x=>x.refId===it.id);
+  if(ada) ada.qty += jml;
+  else keranjang.push({refId:it.id, nama:it.nama, jenis:it.jenis, satuan:it.satuan, harga:it.harga, qty:jml});
+  gambarKeranjang();
+  const total = ada ? ada.qty : jml;
+  pesan(`➕ ${angka(jml)} ${it.satuan} ${it.nama}` + (ada ? ` (jadi ${angka(total)})` : ""));
+}
+
+/* daftar pilihan untuk kotak tarik-turun nama barang */
+function isiDatalistItem(){
+  document.getElementById("daftarItem").innerHTML =
+    db.katalog.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
+      .map(it=>`<option value="${esc(it.nama)}">`).join("");
+}
+
+/* begitu nama yang diketik/dipilih persis sama dengan salah satu item,
+   barang langsung masuk nota sebanyak jumlah di sebelahnya */
+function cekPilihanLangsung(){
+  const el = document.getElementById("cariItem");
+  const v = el.value.trim();
+  if(!v) return false;
+  const it = db.katalog.find(x => x.nama.trim().toLowerCase() === v.toLowerCase());
+  if(!it) return false;
+  const jml = bacaQtyCepat();
+  if(jml <= 0){ mintaIsiJumlah(); return true; }   /* nama dibiarkan, tinggal isi jumlahnya */
+  tambahKeKeranjang(it.id, jml);
+  el.value = "";
+  document.getElementById("qtyCepat").value = "0";
+  el.focus();
+  return true;
 }
 
 function gambarKeranjang(){
   const el = document.getElementById("listKeranjang");
-  document.getElementById("krjCount").textContent = keranjang.length ? `(${keranjang.length} item)` : "";
-  el.innerHTML = keranjang.length ? keranjang.map((b,i)=>`
-    <div class="krj">
-      <div class="main">
-        <div class="nm">${b.jenis==="barang"?"📦":"🛠️"} ${esc(b.nama)}</div>
-        <div class="meta">@ ${rp(b.harga)} / ${esc(b.satuan)}</div>
-      </div>
-      <div class="qty">
-        <button data-q="${i}|-">−</button><span>${angka(b.qty)}</span><button data-q="${i}|+">+</button>
-      </div>
-      <div class="amt">${rp(barisTotal(b))}</div>
+  el.innerHTML = keranjang.length ? `
+    <div class="notaHead">
+      <div>No.</div><div>Nama Barang/Jasa</div>
+      <div class="ka">Jumlah</div><div class="ka">Harga</div><div class="ka">Total</div><div></div>
+    </div>` + keranjang.map((b,i)=>`
+    <div class="notaBaris">
+      <div>${i+1}.</div>
+      <div class="nm">${b.jenis==="barang"?"📦":"🛠️"} ${esc(b.nama)}
+        <div class="sat">${esc(b.satuan)}</div></div>
+      <div class="ka">${angka(b.qty)}</div>
+      <div class="ka">${angkaRp(b.harga)}</div>
+      <div class="ka tot">${angkaRp(barisTotal(b))}</div>
+      <div><button class="hapus" data-buang="${i}" title="Hapus baris">×</button></div>
     </div>`).join("")
-    : `<div class="kosong">Belum ada item. Pilih dari daftar di atas.</div>`;
+    : `<div class="kosong">Belum ada item. Ketik namanya di kolom atas.</div>`;
 
-  document.querySelectorAll("[data-q]").forEach(b=> b.onclick = ()=>{
-    const [i,op] = b.dataset.q.split("|");
-    const it = keranjang[+i]; if(!it) return;
-    if(op==="+") it.qty++;
-    else { it.qty--; if(it.qty<=0) keranjang.splice(+i,1); }
+  document.querySelectorAll("[data-buang]").forEach(b=> b.onclick = ()=>{
+    const i = Number(b.dataset.buang);
+    const it = keranjang[i]; if(!it) return;
+    keranjang.splice(i, 1);
     gambarKeranjang();
+    pesan("🗑️ " + it.nama + " dikeluarkan");
   });
   hitungTampilNota();
 }
@@ -1450,31 +1818,32 @@ function hitungTampilNota(){
   document.getElementById("sDiskon").textContent = h.diskon ? "− "+rp(h.diskon) : rp(0);
   document.getElementById("sTotal").textContent  = rp(h.total);
 
-  const st = document.getElementById("nStatus").value;
-  const dp = st==="dp" ? Math.min(nilaiUang(document.getElementById("nDp")), h.total)
-           : st==="kredit" ? 0 : h.total;
-  const sisa = st==="tunai" ? 0 : Math.max(h.total - dp, 0);
+  const dp = Math.min(Math.max(nilaiUang(document.getElementById("nDp")), 0), h.total);
+  const sisa = Math.max(h.total - dp, 0);
+
   document.getElementById("sDp").textContent   = rp(dp);
   document.getElementById("sSisa").textContent = rp(sisa);
-  document.getElementById("rowDp").classList.toggle("hide", st!=="dp");
-  document.getElementById("rowSisa").classList.toggle("hide", st==="tunai");
-  return {h, dp, sisa, st};
+  document.getElementById("rowSisa").classList.toggle("hide", sisa <= 0);
+  return {h, dp, sisa};
 }
-["dNilai","dTipe","nDp"].forEach(id=> document.getElementById(id).addEventListener("input", hitungTampilNota));
+["dNilai","dTipe"].forEach(id=> document.getElementById(id).addEventListener("input", hitungTampilNota));
 document.getElementById("dTipe").addEventListener("change", hitungTampilNota);
-
-const nStatus = document.getElementById("nStatus");
-nStatus.addEventListener("change", ()=>{
-  document.getElementById("nDpBox").classList.toggle("hide", nStatus.value!=="dp");
-  document.getElementById("nTempoBox").classList.toggle("hide", nStatus.value==="tunai");
-  hitungTampilNota();
-});
+document.getElementById("nDp").addEventListener("input", hitungTampilNota);
 
 document.getElementById("btnKosongkan").addEventListener("click", ()=>{
   if(!keranjang.length) return;
   if(!confirm("Kosongkan isi nota?")) return;
-  keranjang = []; document.getElementById("dNilai").value = ""; gambarKeranjang();
+  keranjang = []; document.getElementById("dNilai").value = "";
+  document.getElementById("nDp").value = "";
+  document.getElementById("qtyCepat").value = "0";
+  document.getElementById("cariItem").value = "";
+  gambarKeranjang();
 });
+
+function segarkanNoNota(){
+  const tgl = document.getElementById("nTgl").value || hariIni();
+  document.getElementById("nNo").value = nomorNota(tgl);
+}
 
 function nomorNota(tgl){
   const pad = tgl.replace(/-/g,"");
@@ -1485,34 +1854,42 @@ function nomorNota(tgl){
 document.getElementById("btnSimpanNota").addEventListener("click", ()=>{
   if(!keranjang.length){ pesan("Isi nota masih kosong"); return; }
   const tgl = document.getElementById("nTgl").value || hariIni();
-  const st = nStatus.value;
   const pelanggan = document.getElementById("nPelanggan").value.trim();
-  if(st!=="tunai" && !pelanggan){ pesan("Isi nama pelanggan — sisanya akan jadi piutang"); return; }
+
+  /* periksa kecukupan stok - tetap boleh dilanjutkan, hanya diingatkan */
+  const kurang = keranjang.map(b=>{
+    const it = db.katalog.find(x=>x.id===b.refId);
+    return (stokDilacak(it) && b.qty > stokNilai(it))
+      ? `• ${it.nama}: diminta ${angka(b.qty)}, stok ${angka(stokNilai(it))} ${it.satuan}` : null;
+  }).filter(Boolean);
+  if(kurang.length && !confirm(
+      "Stok tidak mencukupi:\n\n" + kurang.join("\n") +
+      "\n\nTetap lanjutkan? Stok akan tercatat minus.")) return;
 
   const d = bacaDiskon();
   const h = hitungNotaObj(keranjang, d.tipe, d.nilai);
-  let dp = 0;
-  if(st==="dp"){
-    dp = nilaiUang(document.getElementById("nDp"));
-    if(dp <= 0){ pesan("Isi jumlah uang mukanya"); return; }
-    if(dp >= h.total){ pesan("Uang muka ≥ total. Pilih status LUNAS saja."); return; }
+  const dp = Math.min(Math.max(nilaiUang(document.getElementById("nDp")), 0), h.total);
+  const lunas = dp >= h.total;
+  if(!lunas && !pelanggan){
+    pesan("Isi nama pelanggan — sisanya jadi hutang pelanggan"); return;
   }
   const nota = {
     id: uid(), no: nomorNota(tgl), tgl,
     pelanggan: pelanggan || "Umum",
-    items: keranjang.map(x=>({nama:x.nama, jenis:x.jenis, satuan:x.satuan, harga:x.harga, qty:x.qty})),
+    items: keranjang.map(x=>({refId:x.refId, nama:x.nama, jenis:x.jenis, satuan:x.satuan, harga:x.harga, qty:x.qty})),
     diskonTipe: d.tipe, diskonNilai: d.nilai,
     sBarang:h.sBarang, sJasa:h.sJasa, sub:h.sub, diskon:h.diskon, total:h.total,
-    dp,
-    metode: document.getElementById("nMetode").value,
-    bayar: st,
-    tempo: st==="tunai" ? "" : document.getElementById("nTempo").value,
+    dp: lunas ? 0 : dp,
+    bayar: lunas ? "tunai" : "dp",
+    tempo: "",
     bayaran: []
   };
   db.nota.unshift(nota);
-  const labelBayar = st==="tunai" ? "LUNAS" : st==="dp" ? `DP ${rp(dp)}, sisa ${rp(h.total-dp)}` : "BON";
+  const jejakStok = ubahStokDariNota(nota, -1);
+  const labelBayar = lunas ? "LUNAS" : (dp > 0 ? `Uang muka ${rp(dp)}, sisa ${rp(h.total-dp)}` : `Belum bayar, hutang ${rp(h.total)}`);
   catat("nota", `Buat nota ${nota.no} — ${nota.pelanggan}`,
         `${nota.items.length} item · Total ${rp(h.total)}${h.diskon?` · Diskon ${rp(h.diskon)}`:""} · ${labelBayar}`);
+  if(jejakStok.length) catat("katalog", `Stok berkurang karena nota ${nota.no}`, jejakStok.join(" · "));
   pastikanPelanggan(nota.pelanggan);
   if(!simpan()) return;
 
@@ -1521,10 +1898,155 @@ document.getElementById("btnSimpanNota").addEventListener("click", ()=>{
   document.getElementById("dNilai").value = "";
   document.getElementById("nDp").value = "";
   document.getElementById("nPelanggan").value = "";
-  gambarKeranjang(); gambarRiwayatNota(); isiDatalistPelanggan();
+  gambarKeranjang(); gambarRiwayatNota(); isiDatalistPelanggan(); segarkanNoNota();
   pesan("✅ Nota "+nota.no+" tersimpan");
   document.getElementById("boxNota").scrollIntoView({behavior:"smooth", block:"start"});
 });
+
+
+/* ==========================================================
+   PDF NOTA PENJUALAN
+   Susunannya mengikuti tampilan Isi Nota di layar:
+   No. | Nama Barang/Jasa | Jumlah | Harga | Total
+   ========================================================== */
+function buatPdfNota(n){
+  const L = 595.28, T = 841.89, M = 45;
+  const p = db.profil;
+  const halaman = [];
+  let isi = [], y = 0;
+
+  const halamanBaru = ()=>{ if(isi.length) halaman.push(isi); isi = []; y = T - M; };
+  const teks = (t, x, yy, uk, tebal, warna)=>{
+    const w = warna || [0.08,0.09,0.12];
+    isi.push(`BT ${w[0].toFixed(3)} ${w[1].toFixed(3)} ${w[2].toFixed(3)} rg ` +
+             `/${tebal ? "F2" : "F1"} ${uk} Tf 1 0 0 1 ${x.toFixed(2)} ${yy.toFixed(2)} Tm (${escPdf(t)}) Tj ET`);
+  };
+  const teksKa = (t, xKanan, yy, uk, tebal, warna)=>
+    teks(t, xKanan - lebarTaksir(t, uk), yy, uk, tebal, warna);
+  const garis = (yy, tebal)=> isi.push(
+    `0.82 0.85 0.88 RG ${tebal || 0.7} w ${M} ${yy.toFixed(2)} m ${(L-M).toFixed(2)} ${yy.toFixed(2)} l S`);
+  const kotak = (x,yy,w,hh,c)=> isi.push(
+    `${c[0]} ${c[1]} ${c[2]} rg ${x.toFixed(2)} ${yy.toFixed(2)} ${w.toFixed(2)} ${hh.toFixed(2)} re f`);
+
+  /* tepi kanan tiap kolom, disamakan dengan tampilan di layar */
+  const xNo = M, xNama = M + 26;
+  const xQty = M + 322, xHarga = M + 400, xTotal = L - M;
+
+  halamanBaru();
+
+  /* --- kepala --- */
+  teks(p.nama || "Nota Penjualan", M, y - 20, 17, true, [0.06,0.46,0.43]);
+  teksKa("NOTA PENJUALAN", L - M, y - 20, 12, true, [0.42,0.45,0.53]);
+  y -= 36;
+  const kontak = [p.alamat, p.wa ? "WA " + p.wa : ""].filter(Boolean).join("  |  ");
+  if(kontak){ teks(kontak, M, y, 8.5, false, [0.42,0.45,0.53]); }
+  teksKa("No. " + n.no, L - M, y, 9.5, true);
+  y -= 12;
+  teksKa(tglPanjang(n.tgl), L - M, y, 9, false, [0.42,0.45,0.53]);
+  y -= 20;
+  garis(y, 1.2);
+  y -= 20;
+
+  teks("Kepada:", M, y, 9, false, [0.42,0.45,0.53]);
+  teks(n.pelanggan || "Umum", M + 46, y, 11, true);
+  y -= 24;
+
+  /* --- judul kolom --- */
+  kotak(M - 6, y - 6, L - M*2 + 12, 18, [0.90,0.96,0.95]);
+  teks("NO.", xNo, y, 8.5, true, [0.30,0.35,0.42]);
+  teks("NAMA BARANG/JASA", xNama, y, 8.5, true, [0.30,0.35,0.42]);
+  teksKa("JUMLAH", xQty, y, 8.5, true, [0.30,0.35,0.42]);
+  teksKa("HARGA", xHarga, y, 8.5, true, [0.30,0.35,0.42]);
+  teksKa("TOTAL", xTotal, y, 8.5, true, [0.30,0.35,0.42]);
+  y -= 20;
+
+  /* --- baris barang --- */
+  (n.items || []).forEach((b, i)=>{
+    if(y < M + 150){
+      halamanBaru();
+      teks("Lanjutan nota " + n.no, M, y - 14, 9, false, [0.42,0.45,0.53]);
+      y -= 34;
+    }
+    teks((i+1) + ".", xNo, y, 10);
+    teks(b.nama, xNama, y, 10, true);
+    teks(b.satuan || "", xNama, y - 10, 8, false, [0.55,0.58,0.64]);
+    teksKa(angka(b.qty), xQty, y, 10);
+    teksKa(angkaRp(b.harga), xHarga, y, 10);
+    teksKa(angkaRp(barisTotal(b)), xTotal, y, 10, true);
+    y -= 26;
+    garis(y + 8);
+  });
+
+  /* --- ringkasan --- */
+  y -= 8;
+  const kiriRingkas = M + 300;
+  const rangkum = (label, nilai, tebal, warna, ukuran)=>{
+    teks(label, kiriRingkas, y, ukuran || 9.5, tebal, warna);
+    teksKa(nilai, xTotal, y, ukuran || 9.5, tebal, warna);
+    y -= 16;
+  };
+  if(n.sJasa > 0 && n.sBarang > 0){
+    rangkum("Subtotal Barang", angkaRp(n.sBarang));
+    rangkum("Subtotal Jasa", angkaRp(n.sJasa));
+  }
+  rangkum("Subtotal", angkaRp(n.sub));
+  if(n.diskon > 0)
+    rangkum("Diskon" + (n.diskonTipe === "persen" ? " (" + angka(n.diskonNilai) + "%)" : ""),
+            "- " + angkaRp(n.diskon), false, [0.72,0.11,0.11]);
+
+  y -= 4; garis(y + 10, 1.2); y -= 4;
+  rangkum("GRAND TOTAL", "Rp " + angkaRp(n.total), true, [0.08,0.09,0.12], 12);
+
+  const dp = dpNota(n), sisa = sisaTagihan(n);
+  if(n.bayar !== "tunai" && dp > 0) rangkum("Uang muka dibayar", angkaRp(dp), false, [0.08,0.50,0.24]);
+  (n.bayaran || []).slice().sort((a,b)=>(a.tgl||"").localeCompare(b.tgl||""))
+    .forEach(x => rangkum("Bayar " + tglPendek(x.tgl), angkaRp(x.jml), false, [0.08,0.50,0.24]));
+  if(sisa > 0) rangkum("SISA", "Rp " + angkaRp(sisa), true, [0.72,0.11,0.11], 11);
+
+  /* --- keterangan lunas --- */
+  y -= 10;
+  if(sisa <= 0){
+    kotak(M, y - 6, 150, 20, [0.90,0.96,0.92]);
+    teks("LUNAS", M + 10, y, 11, true, [0.08,0.50,0.24]);
+  }else{
+    kotak(M, y - 6, 220, 20, [0.99,0.93,0.93]);
+    teks("BELUM LUNAS - sisa Rp " + angkaRp(sisa), M + 10, y, 10, true, [0.72,0.11,0.11]);
+  }
+
+  halamanBaru();
+
+  /* --- kaki tiap halaman --- */
+  halaman.forEach((hal, i)=>{
+    hal.push(`BT 0.55 0.58 0.64 rg /F1 8 Tf 1 0 0 1 ${M} ${M-14} Tm ` +
+             `(${escPdf("Terima kasih atas kepercayaan Anda. Simpan nota ini sebagai bukti pembayaran.")}) Tj ET`);
+    hal.push(`BT 0.55 0.58 0.64 rg /F1 8 Tf 1 0 0 1 ${(L-M-50)} ${M-14} Tm ` +
+             `(${escPdf("Hal " + (i+1) + " / " + halaman.length)}) Tj ET`);
+  });
+
+  /* --- rakit --- */
+  const objs = [];
+  const nomorHal = halaman.map((_, i)=> 5 + i*2);
+  objs[0] = `<< /Type /Catalog /Pages 2 0 R >>`;
+  objs[1] = `<< /Type /Pages /Kids [${nomorHal.map(x=>x+" 0 R").join(" ")}] /Count ${halaman.length} >>`;
+  objs[2] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>`;
+  objs[3] = `<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>`;
+  halaman.forEach((hal, i)=>{
+    const nHal = nomorHal[i], nIsi = nHal + 1;
+    objs[nHal-1] = `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${L.toFixed(2)} ${T.toFixed(2)}] ` +
+      `/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${nIsi} 0 R >>`;
+    const aliran = hal.join("\n");
+    objs[nIsi-1] = `<< /Length ${aliran.length} >>\nstream\n${aliran}\nendstream`;
+  });
+  return rakitPdf(objs);
+}
+
+async function bagikanPdfNota(){
+  if(!notaAktif){ pesan("Belum ada nota"); return; }
+  let blob;
+  try{ blob = buatPdfNota(notaAktif); }
+  catch(e){ pesan("Gagal membuat PDF: " + e.message); return; }
+  await bagikanPdf(blob, "Nota-" + notaAktif.no + ".pdf", "Nota " + notaAktif.no);
+}
 
 function teksNota(n){
   const p = db.profil, B = [];
@@ -1590,7 +2112,7 @@ function teksNota(n){
   const dp = dpNota(n), sisa = sisaTagihan(n);
   const cic = (n.bayaran||[]).slice().sort((a,b)=>(a.tgl||"").localeCompare(b.tgl||""));
   if(n.bayar !== "tunai" && dp > 0){
-    t("• Uang Muka (DP) dibayar");
+    t("• Uang muka dibayar");
     t(`  ✅ ${tglPendek(n.tgl)} — ${rp(dp)}`);
     t("");
   }
@@ -1609,19 +2131,13 @@ function teksNota(n){
   garis();
 
   if(n.bayar==="tunai"){
-    t(`💳 Metode Bayar: ${n.metode}`);
-    t("✅ Status: *LUNAS*");
+    t("✅ *LUNAS*");
   }else if(sudahLunas(n)){
     const akhir = (n.bayaran||[]).slice().sort((a,b)=>(a.tgl||"").localeCompare(b.tgl||"")).pop();
-    t(`💳 Metode Bayar: ${n.metode}`);
-    t(`✅ Status: *LUNAS*${akhir ? ` (dilunasi ${tglPendek(akhir.tgl)})` : ""}`);
-  }else if(terbayar(n) > 0){
-    t(`💳 Metode Bayar: ${n.metode}`);
-    t(`🕒 Status: *BARU DIBAYAR SEBAGIAN — SISA ${rp(sisa)}*`);
-    t(`🗓️ Jatuh tempo pelunasan: ${n.tempo ? tglPanjang(n.tempo) : "-"}`);
+    t(`✅ *LUNAS*${akhir ? ` — dilunasi ${tglPendek(akhir.tgl)}` : ""}`);
   }else{
-    t("🕒 Status: *BELUM LUNAS / BON*");
-    t(`🗓️ Jatuh tempo: ${n.tempo ? tglPanjang(n.tempo) : "-"}`);
+    t(`🕒 *BELUM LUNAS — SISA ${rp(sisa)}*`);
+    if(n.tempo) t(`🗓️ Jatuh tempo: ${tglPanjang(n.tempo)}`);
   }
   t("");
   t("🙏 Terima kasih atas kepercayaan Anda.");
@@ -1644,6 +2160,7 @@ function tampilkanNota(n){
     btn.classList.add("hide");
   }
 }
+document.getElementById("btnPdfNota").addEventListener("click", bagikanPdfNota);
 document.getElementById("btnSalinNota").addEventListener("click", ()=> salin(document.getElementById("hasilNota").textContent));
 document.getElementById("btnWaNota").addEventListener("click", ()=> kirimWa(document.getElementById("hasilNota").textContent));
 document.getElementById("btnWaPelanggan").addEventListener("click", ()=>{
@@ -1687,10 +2204,12 @@ function gambarRiwayatNota(){
   document.querySelectorAll("[data-hapus-nota]").forEach(b=> b.onclick = ()=>{
     const n = db.nota.find(x=>x.id===b.dataset.hapusNota);
     if(!n || !confirm(`Hapus nota ${n.no}?`)) return;
+    const balik = ubahStokDariNota(n, +1);
     catat("nota", `Hapus nota ${n.no} — ${n.pelanggan}`,
           `Total ${rp(n.total)} · sudah dibayar ${rp(terbayar(n))}`);
+    if(balik.length) catat("katalog", `Stok dikembalikan karena nota ${n.no} dihapus`, balik.join(" · "));
     db.nota = db.nota.filter(x=>x.id!==b.dataset.hapusNota);
-    simpan(); gambarRiwayatNota(); pesan("Nota dihapus");
+    simpan(); gambarRiwayatNota(); gambarKatalog(); pesan("Nota dihapus");
   });
 }
 
@@ -2406,9 +2925,9 @@ document.getElementById("btnDemo").addEventListener("click", ()=>{
     jam:"Senin–Sabtu, 08.00–17.00", penyusun:"", saldoAwal:5000000, tglMulai:H(1)
   };
   db.katalog = [
-    {id:"k1", jenis:"barang", nama:"Oli Mesin",   harga:50000,  satuan:"botol", desc:"Menjaga mesin tetap dingin dan halus, tarikan jadi lebih enteng.", foto:""},
-    {id:"k2", jenis:"barang", nama:"Filter Oli",  harga:45000,  satuan:"pcs",   desc:"Menyaring kotoran sebelum masuk mesin, komponen dalam lebih awet.", foto:""},
-    {id:"k3", jenis:"barang", nama:"Aki Kering",  harga:320000, satuan:"unit",  desc:"Starter langsung nyala, bebas perawatan dan aman tanpa air aki.", foto:""},
+    {id:"k1", jenis:"barang", nama:"Oli Mesin",   harga:50000,  satuan:"botol", stok:48, stokMin:10, desc:"Menjaga mesin tetap dingin dan halus, tarikan jadi lebih enteng.", foto:""},
+    {id:"k2", jenis:"barang", nama:"Filter Oli",  harga:45000,  satuan:"pcs",   stok:12, stokMin:5,  desc:"Menyaring kotoran sebelum masuk mesin, komponen dalam lebih awet.", foto:""},
+    {id:"k3", jenis:"barang", nama:"Aki Kering",  harga:320000, satuan:"unit",  stok:4,  stokMin:5,  desc:"Starter langsung nyala, bebas perawatan dan aman tanpa air aki.", foto:""},
     {id:"k4", jenis:"jasa",   nama:"Servis Ringan", harga:100000, satuan:"kali", desc:"Tune-up cepat sekitar 45 menit, kendaraan kembali responsif dan irit.", foto:""},
     {id:"k5", jenis:"jasa",   nama:"Servis Besar",  harga:450000, satuan:"kali", desc:"Pembongkaran dan pembersihan menyeluruh untuk mesin yang terasa berat.", foto:""},
     {id:"k6", jenis:"jasa",   nama:"Cuci Kendaraan",harga:25000,  satuan:"kali", desc:"Bersih sampai sela-sela, tampilan kembali kinclong seperti baru.", foto:""}
@@ -2423,7 +2942,7 @@ document.getElementById("btnDemo").addEventListener("click", ()=>{
       no: `NT-${tgl.replace(/-/g,"")}-${String(urut[tgl]).padStart(3,"0")}`,
       tgl, pelanggan, items, diskonTipe:dTipe, diskonNilai:dNilai,
       sBarang:h.sBarang, sJasa:h.sJasa, sub:h.sub, diskon:h.diskon, total:h.total,
-      dp: dp||0, metode:"Tunai", bayar, tempo:tempo||"", bayaran:[]
+      dp: dp||0, bayar, tempo:tempo||"", bayaran:[]
     };
   };
   db.pelanggan = [
@@ -2521,6 +3040,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   document.getElementById("lSampai").value = z;
   document.querySelector('[data-lp="bulan-ini"]').classList.add("on");
   ["nTgl","kTgl","mTgl"].forEach(id=> document.getElementById(id).value = hariIni());
+  document.getElementById("nTgl").addEventListener("change", segarkanNoNota);
+  segarkanNoNota();
   if(!db.profil.tglMulai) db.profil.tglMulai = a;
 
   document.getElementById("infoPakai").textContent =
@@ -2538,7 +3059,8 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
                   setTimeout(()=>document.getElementById("gbSandi").focus(), 60); }
   }
   isiDatalistPelanggan();
-  gambarPilihItem(); gambarKeranjang(); gambarRiwayatNota(); gambarLaporan();
+  isiDatalistItem();
+  gambarKeranjang(); gambarRiwayatNota(); gambarLaporan();
   document.getElementById("hdrNama").textContent = db.profil.nama || "Nota Toko";
 })();
 </script>
