@@ -132,6 +132,17 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 .diskonKotak{display:flex;gap:6px}
 .diskonKotak select{flex:0 0 62px;padding-left:8px;padding-right:2px;text-align:left;font-weight:600}
 .diskonKotak input{flex:1;min-width:0}
+/* daftar saran buatan sendiri - <datalist> bawaan tidak muncul di
+   sebagian browser HP, terutama saat aplikasi dibuka dari ikon */
+.bidangSaran{position:relative}
+.saran{position:absolute;left:0;right:0;top:100%;z-index:70;margin-top:4px;
+  background:var(--card);border:1px solid var(--line);border-radius:10px;
+  box-shadow:0 10px 28px rgba(0,0,0,.18);max-height:240px;overflow:auto;overscroll-behavior:contain}
+.saran .baris{display:flex;justify-content:space-between;gap:10px;align-items:baseline;
+  padding:12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:14px;line-height:1.3}
+.saran .baris:last-child{border-bottom:0}
+.saran .baris.aktif,.saran .baris:active{background:var(--brand-soft)}
+.saran .kanan{color:var(--muted);font-size:12px;white-space:nowrap;font-variant-numeric:tabular-nums}
 .hide{display:none!important}
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13.5px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;max-width:88vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
@@ -216,8 +227,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     <input type="text" id="nNo" readonly>
     <div class="row2">
       <div><label for="nPelanggan">Nama Pelanggan</label>
-        <input type="text" id="nPelanggan" list="daftarPelanggan" autocomplete="off" placeholder="Ketik / pilih dari daftar">
-        <datalist id="daftarPelanggan"></datalist>
+        <input type="text" id="nPelanggan" autocomplete="off" placeholder="Ketik / pilih dari daftar">
       </div>
       <div><label for="nTgl">Tanggal</label><input type="date" id="nTgl"></div>
     </div>
@@ -228,8 +238,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     <div class="periode">
       <div>
         <label for="cariItem">Nama barang atau jasa</label>
-        <input type="text" id="cariItem" list="daftarItem" autocomplete="off" placeholder="Ketik / pilih dari daftar">
-        <datalist id="daftarItem"></datalist>
+        <input type="text" id="cariItem" autocomplete="off" placeholder="Ketik / pilih dari daftar">
       </div>
       <div style="flex:0 0 92px">
         <label for="qtyCepat">Jumlah</label>
@@ -303,8 +312,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 
       <div class="row2">
         <div><label for="iHarga">Harga (Rp)</label><input type="text" id="iHarga" inputmode="numeric" class="uang" placeholder="0" required></div>
-        <div><label for="iSatuan">Satuan</label><input type="text" id="iSatuan" list="dSatuan" value="pcs">
-          <datalist id="dSatuan"><option value="pcs"><option value="botol"><option value="unit"><option value="set"><option value="m"><option value="m2"><option value="kali"><option value="paket"></datalist>
+        <div><label for="iSatuan">Satuan</label><input type="text" id="iSatuan" autocomplete="off" value="pcs">
         </div>
       </div>
 
@@ -1590,11 +1598,7 @@ function statPelanggan(nama){
     terakhir
   };
 }
-function isiDatalistPelanggan(){
-  document.getElementById("daftarPelanggan").innerHTML =
-    db.pelanggan.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
-      .map(p=>`<option value="${esc(p.nama)}">`).join("");
-}
+function isiDatalistPelanggan(){}
 /* nama baru yang diketik di kasir otomatis masuk daftar */
 function pastikanPelanggan(nama){
   const n = String(nama||"").trim();
@@ -1746,8 +1750,83 @@ document.getElementById("btnSalinPelanggan").addEventListener("click", ()=> sali
 document.getElementById("btnWaDaftarPelanggan").addEventListener("click", ()=> kirimWa(document.getElementById("hasilPelanggan").textContent));
 
 /* ==========================================================
-   KASIR
+   DAFTAR SARAN
+   Pengganti <datalist> bawaan, yang tidak muncul di sebagian
+   browser HP. Daftarnya dibaca ulang tiap kali kotaknya dibuka.
    ========================================================== */
+function pasangSaran(idInput, ambilDaftar, saatPilih){
+  const inp = document.getElementById(idInput);
+  if(!inp) return;
+
+  const bungkus = document.createElement("div");
+  bungkus.className = "bidangSaran";
+  inp.parentNode.insertBefore(bungkus, inp);
+  bungkus.appendChild(inp);
+
+  const kotak = document.createElement("div");
+  kotak.className = "saran hide";
+  bungkus.appendChild(kotak);
+
+  let daftarKini = [], sorot = -1;
+
+  const tutup = ()=>{ kotak.classList.add("hide"); sorot = -1; };
+
+  function gambar(){
+    const q = inp.value.trim().toLowerCase();
+    let L = ambilDaftar();
+    if(q) L = L.filter(x => x.label.toLowerCase().includes(q));
+    daftarKini = L.slice(0, 50);
+    if(!daftarKini.length){ tutup(); return; }
+    kotak.innerHTML = daftarKini.map((x,i)=>
+      `<div class="baris" data-i="${i}"><span>${esc(x.label)}</span>` +
+      (x.kanan ? `<span class="kanan">${esc(x.kanan)}</span>` : "") + `</div>`).join("");
+    kotak.querySelectorAll(".baris").forEach(el=>{
+      /* pointerdown + preventDefault supaya kotaknya tidak keburu tertutup
+         oleh blur sebelum ketukan terbaca */
+      el.addEventListener("pointerdown", e=>{
+        e.preventDefault();
+        pilih(daftarKini[Number(el.dataset.i)]);
+      });
+    });
+    sorot = -1;
+    kotak.classList.remove("hide");
+  }
+
+  function pilih(item){
+    if(!item) return;
+    inp.value = item.label;
+    tutup();
+    if(saatPilih) saatPilih(item);
+  }
+
+  inp.addEventListener("focus", gambar);
+  inp.addEventListener("input", gambar);
+  inp.addEventListener("blur", ()=> setTimeout(tutup, 150));
+  inp.addEventListener("keydown", e=>{
+    if(kotak.classList.contains("hide")) return;
+    if(e.key === "ArrowDown" || e.key === "ArrowUp"){
+      e.preventDefault();
+      sorot += (e.key === "ArrowDown" ? 1 : -1);
+      if(sorot < 0) sorot = daftarKini.length - 1;
+      if(sorot >= daftarKini.length) sorot = 0;
+      kotak.querySelectorAll(".baris").forEach((el,i)=> el.classList.toggle("aktif", i === sorot));
+      const aktif = kotak.querySelector(".baris.aktif");
+      if(aktif) aktif.scrollIntoView({block:"nearest"});
+    }else if(e.key === "Enter" && sorot >= 0){
+      e.preventDefault();
+      pilih(daftarKini[sorot]);
+    }else if(e.key === "Escape"){
+      tutup();
+    }
+  });
+  document.addEventListener("pointerdown", e=>{
+    if(!bungkus.contains(e.target)) tutup();
+  });
+}
+
+/* ==========================================================
+   KASIR
+   ========================================== */
 /* arah -1 saat nota dibuat (stok berkurang), +1 saat nota dihapus (stok kembali).
    Mengembalikan daftar perubahan untuk dicatat di log. */
 function ubahStokDariNota(nota, arah){
@@ -1808,12 +1887,10 @@ function tambahKeKeranjang(id, qty){
   pesan(`➕ ${angka(jml)} ${it.satuan} ${it.nama}` + (ada ? ` (jadi ${angka(total)})` : ""));
 }
 
-/* daftar pilihan untuk kotak tarik-turun nama barang */
-function isiDatalistItem(){
-  document.getElementById("daftarItem").innerHTML =
-    db.katalog.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
-      .map(it=>`<option value="${esc(it.nama)}">`).join("");
-}
+/* Daftar saran kini dibaca langsung dari data saat kotaknya dibuka,
+   jadi tidak ada lagi yang perlu diisi di muka. Fungsi ini dibiarkan
+   ada karena masih dipanggil dari beberapa tempat. */
+function isiDatalistItem(){}
 
 /* begitu nama yang diketik/dipilih persis sama dengan salah satu item,
    barang langsung masuk nota sebanyak jumlah di sebelahnya */
@@ -3162,6 +3239,23 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   segarkanNoNota();
   if(!db.profil.tglMulai) db.profil.tglMulai = a;
 
+
+  pasangSaran("nPelanggan",
+    ()=> db.pelanggan.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
+           .map(x=>({label:x.nama, kanan:x.hp || ""})));
+
+  pasangSaran("cariItem",
+    ()=> db.katalog.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
+           .map(x=>({label:x.nama,
+                     kanan: rp(x.harga) + (stokDilacak(x) ? " - sisa " + angka(stokNilai(x)) : "")})),
+    ()=> cekPilihanLangsung());
+
+  pasangSaran("iSatuan",
+    ()=>{
+      const dipakai = [...new Set(db.katalog.map(x=>x.satuan).filter(Boolean))];
+      const bawaan = ["pcs","botol","unit","set","m","m2","kali","paket","batang","lembar"];
+      return [...new Set(dipakai.concat(bawaan))].map(x=>({label:x}));
+    });
 
   isiProfil();
   segarkanKartuKunci();
