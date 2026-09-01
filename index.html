@@ -280,6 +280,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
       <button id="btnWaNota">💬 WhatsApp</button>
       <button id="btnCetakNota">🖨️ Cetak</button>
     </div>
+    <div class="note infoBagi">Di HP, tombol PDF langsung memunculkan pilihan WhatsApp. Di laptop, PDF-nya diunduh lalu Anda lampirkan sendiri.</div>
   </div>
 
   <div class="card">
@@ -346,7 +347,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     <h2>📤 Katalog Siap Kirim</h2>
     <div class="note" style="margin-top:0">Kirim sebagai PDF berfoto, atau sebagai teks biasa.</div>
     <button class="primary block" id="btnPdfKatalog">📄 Kirim Katalog PDF</button>
-    <div class="note">Di HP, tombol ini langsung memunculkan pilihan WhatsApp. Di laptop, PDF-nya diunduh lalu Anda lampirkan sendiri.</div>
+    <div class="note infoBagi">Di HP, tombol ini langsung memunculkan pilihan WhatsApp. Di laptop, PDF-nya diunduh lalu Anda lampirkan sendiri.</div>
     <button class="block" id="btnBuatKatalog">📝 Buat Teks Katalog</button>
     <div class="hide" id="boxKatalog" style="margin-top:12px">
       <pre class="teks" id="hasilKatalog"></pre>
@@ -1302,23 +1303,53 @@ function rakitPdf(objs){
 }
 
 /* di HP memunculkan pilihan aplikasi termasuk WhatsApp; di laptop diunduh */
+/* PDF yang sudah jadi disimpan sebentar. Kalau Android menolak karena
+   pembuatan PDF memakan waktu terlalu lama sejak tombol ditekan, tekan
+   sekali lagi akan langsung memakai berkas yang sudah jadi ini. */
+let pdfSiapKirim = null;
+
+function catatanBagi(pesanHtml){
+  document.querySelectorAll(".infoBagi").forEach(el => el.innerHTML = pesanHtml);
+}
+
 async function bagikanPdf(blob, namaBerkas, judul){
   const berkas = new File([blob], namaBerkas, { type: "application/pdf" });
-  if(navigator.canShare && navigator.canShare({ files: [berkas] })){
-    try{
-      await navigator.share({ files: [berkas], title: judul });
-      pesan("Terkirim");
-      return;
-    }catch(e){
-      if(e.name === "AbortError") return;
-    }
+
+  if(!navigator.share || !navigator.canShare){
+    unduhBerkas(blob, namaBerkas);
+    catatanBagi("ℹ️ Browser ini tidak punya fitur kirim berkas, jadi PDF-nya diunduh. " +
+      "Buka aplikasi ini lewat <b>Chrome</b> di HP agar pilihan WhatsApp muncul. " +
+      "Peramban bawaan WhatsApp, Facebook, atau Instagram tidak bisa mengirim berkas.");
+    pesan("PDF diunduh");
+    return;
   }
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = namaBerkas;
-  document.body.appendChild(a); a.click(); document.body.removeChild(a);
-  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
-  pesan("PDF diunduh - lampirkan ke WhatsApp");
+  if(!navigator.canShare({ files: [berkas] })){
+    unduhBerkas(blob, namaBerkas);
+    catatanBagi("⚠️ Perangkat ini menolak membagikan berkas PDF, jadi diunduh saja. " +
+      "Kirim sendiri dari folder Unduhan.");
+    pesan("PDF diunduh");
+    return;
+  }
+
+  try{
+    await navigator.share({ files: [berkas] });     /* tanpa judul: sebagian penerima menolaknya */
+    pdfSiapKirim = null;
+    catatanBagi("✅ Terkirim.");
+    pesan("Terkirim");
+  }catch(e){
+    if(e.name === "AbortError"){ catatanBagi("Pengiriman dibatalkan."); return; }
+    if(e.name === "NotAllowedError"){
+      /* izin berbagi kedaluwarsa karena PDF terlalu lama dibuat */
+      pdfSiapKirim = { blob, nama: namaBerkas };
+      catatanBagi("⏳ PDF butuh waktu dibuat sehingga izin kirim kedaluwarsa. " +
+        "<b>Tekan tombolnya sekali lagi</b> — sekarang langsung terkirim.");
+      pesan("Tekan sekali lagi");
+      return;
+    }
+    unduhBerkas(blob, namaBerkas);
+    catatanBagi("⚠️ Gagal mengirim (" + esc(e.name) + "), PDF diunduh saja.");
+    pesan("PDF diunduh");
+  }
 }
 
 function buatPdfKatalog(){
@@ -1456,6 +1487,11 @@ function buatPdfKatalog(){
 
 async function bagikanPdfKatalog(){
   if(!db.katalog.length){ pesan("Katalog masih kosong"); return; }
+  if(pdfSiapKirim){                       /* percobaan ulang: langsung kirim, tanpa membuat ulang */
+    const siap = pdfSiapKirim; pdfSiapKirim = null;
+    await bagikanPdf(siap.blob, siap.nama);
+    return;
+  }
   let blob;
   try{ blob = buatPdfKatalog(); }
   catch(e){ pesan("❌ Gagal membuat PDF: " + e.message); return; }
@@ -2049,6 +2085,11 @@ function buatPdfNota(n){
 
 async function bagikanPdfNota(){
   if(!notaAktif){ pesan("Belum ada nota"); return; }
+  if(pdfSiapKirim){
+    const siap = pdfSiapKirim; pdfSiapKirim = null;
+    await bagikanPdf(siap.blob, siap.nama);
+    return;
+  }
   let blob;
   try{ blob = buatPdfNota(notaAktif); }
   catch(e){ pesan("Gagal membuat PDF: " + e.message); return; }
