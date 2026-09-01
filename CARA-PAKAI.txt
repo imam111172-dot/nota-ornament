@@ -311,6 +311,39 @@ di internet. Artinya:
     dan pakai terus.
   - Jika data browser dihapus, data aplikasi ikut hilang.
 
-Karena itu rutin buka tab "Atur" -> "Unduh Cadangan".
-File cadangan itu dipakai untuk memulihkan data lewat tombol
-"Pulihkan", termasuk untuk memindahkan data dari laptop ke HP.
+Karena itu rutin buka tab "Atur" -> bagian "Cadangkan Data".
+
+APA SAJA YANG IKUT DALAM SATU BERKAS CADANGAN
+  Profil toko, katalog BERIKUT FOTONYA, pelanggan, seluruh nota,
+  pengeluaran, pemasukan lain, hutang-piutang, dan log aktivitas.
+  Semuanya menyatu dalam satu berkas - tidak ada yang terpisah,
+  jadi tidak mungkin ada yang tertinggal.
+
+  Ukurannya kecil. Foto adalah bagian terbesar, sekitar 7-8 KB
+  per barang setelah diperkecil otomatis.
+
+MEMINDAHKAN DATA KE PERANGKAT LAIN
+  1. Di perangkat lama : "Kirim Cadangan ke Perangkat Lain",
+                         lalu pilih WhatsApp, Drive, atau email.
+  2. Di perangkat baru : simpan berkasnya, buka aplikasi ini,
+                         tekan "Pulihkan dari Berkas", pilih
+                         berkas tadi.
+
+  Di laptop tombol Kirim akan mengunduh berkasnya - kirim sendiri
+  dari folder Unduhan. Sebagian HP menolak berkas .json; kalau
+  begitu aplikasi otomatis mengirimnya sebagai .txt dengan isi
+  yang sama persis, dan tetap bisa dipulihkan seperti biasa.
+
+  Perhatikan: memulihkan akan MENGGANTI seluruh data di perangkat
+  tujuan, bukan menggabungkan.
+
+  Sandi masuk aplikasi sengaja TIDAK ikut dipulihkan. Yang berlaku
+  tetap sandi perangkat tempat Anda memulihkan, supaya Anda tidak
+  terkunci oleh sandi lama yang sudah terlupakan.
+
+JAGA BERKAS INI
+  Isinya nama, nomor HP, alamat pelanggan, dan besar hutang
+  mereka. Perlakukan seperti buku besar toko:
+    - JANGAN diunggah ke GitHub - repositorinya publik.
+    - Simpan di Drive pribadi, atau kirim ke WhatsApp diri
+      sendiri. Jangan ke grup.

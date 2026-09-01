@@ -644,12 +644,18 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 
   <div class="card">
     <h2>💾 Cadangkan Data</h2>
-    <div class="note" style="margin-top:0">Data tersimpan di perangkat ini saja. Unduh cadangan secara berkala.</div>
+    <div class="note" style="margin-top:0">Data tersimpan di perangkat ini saja. Cadangkan secara berkala, dan pakai berkas yang sama untuk memindahkan data ke perangkat lain.</div>
+    <button class="primary block" id="btnKirimCadangan" style="margin-top:10px">📤 Kirim Cadangan ke Perangkat Lain</button>
     <div class="btnrow">
-      <button id="btnExport">⬇️ Unduh Cadangan</button>
-      <button id="btnImport">⬆️ Pulihkan</button>
+      <button id="btnExport">⬇️ Unduh Saja</button>
+      <button id="btnImport">⬆️ Pulihkan dari Berkas</button>
     </div>
-    <input type="file" id="fileImport" accept="application/json,.json" class="hide">
+    <input type="file" id="fileImport" accept="application/json,.json,text/plain,.txt" class="hide">
+    <div class="note">
+      Cara memindahkan: di perangkat lama tekan <b>Kirim Cadangan</b> lalu pilih WhatsApp
+      atau Drive. Di perangkat baru, simpan berkasnya, buka aplikasi ini, lalu tekan
+      <b>Pulihkan dari Berkas</b> dan pilih berkas itu.
+    </div>
     <div class="note" id="infoPakai"></div>
   </div>
 
@@ -2864,14 +2870,50 @@ document.getElementById("btnSalinLog").addEventListener("click", ()=>{
   salin(teks);
 });
 
-document.getElementById("btnExport").addEventListener("click", ()=>{
-  const blob = new Blob([JSON.stringify(db)], {type:"application/json"});
+function namaCadangan(ext){
+  const toko = (db.profil.nama || "Toko").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  return `cadangan-nota-toko-${toko}-${hariIni()}.${ext}`;
+}
+function unduhBerkas(blob, nama){
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
-  a.download = `cadangan-nota-toko-${hariIni()}.json`;
+  a.download = nama;
   document.body.appendChild(a); a.click(); document.body.removeChild(a);
   setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+}
+
+document.getElementById("btnExport").addEventListener("click", ()=>{
+  unduhBerkas(new Blob([JSON.stringify(db)], {type:"application/json"}), namaCadangan("json"));
   pesan("⬇️ Cadangan diunduh");
+});
+
+document.getElementById("btnKirimCadangan").addEventListener("click", async ()=>{
+  const isi = JSON.stringify(db);
+  const ukuran = Math.round(new Blob([isi]).size / 1024);
+
+  /* Sebagian browser menolak membagikan berkas .json.
+     Kalau ditolak, dicoba lagi sebagai .txt yang isinya sama persis. */
+  const percobaan = [
+    { nama: namaCadangan("json"), tipe: "application/json" },
+    { nama: namaCadangan("txt"),  tipe: "text/plain" }
+  ];
+  for(const c of percobaan){
+    const berkas = new File([isi], c.nama, { type: c.tipe });
+    if(navigator.canShare && navigator.canShare({ files: [berkas] })){
+      try{
+        await navigator.share({ files: [berkas], title: "Cadangan " + (db.profil.nama || "Toko") });
+        catat("data", "Cadangan dikirim ke perangkat lain", `${ukuran} KB · ${db.nota.length} nota`);
+        simpan();
+        pesan("✅ Cadangan terkirim");
+        return;
+      }catch(e){
+        if(e.name === "AbortError") return;      /* dibatalkan pengguna */
+      }
+    }
+  }
+  /* browser tidak mendukung berbagi berkas - diunduh saja */
+  unduhBerkas(new Blob([isi], {type:"application/json"}), namaCadangan("json"));
+  pesan("⬇️ Diunduh — kirim sendiri berkasnya dari folder Unduhan");
 });
 document.getElementById("btnImport").addEventListener("click", ()=> document.getElementById("fileImport").click());
 document.getElementById("fileImport").addEventListener("change", e=>{
