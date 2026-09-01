@@ -137,7 +137,10 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 .bidangSaran{position:relative}
 .saran{position:absolute;left:0;right:0;top:100%;z-index:70;margin-top:4px;
   background:var(--card);border:1px solid var(--line);border-radius:10px;
-  box-shadow:0 10px 28px rgba(0,0,0,.18);max-height:240px;overflow:auto;overscroll-behavior:contain}
+  box-shadow:0 10px 28px rgba(0,0,0,.18);max-height:264px;overflow-y:auto;
+  overscroll-behavior:contain;-webkit-overflow-scrolling:touch;touch-action:pan-y}
+/* layar pendek: daftar dipendekkan agar tidak menutupi seluruh isian */
+@media (max-height:640px){.saran{max-height:190px}}
 .saran .baris{display:flex;justify-content:space-between;gap:10px;align-items:baseline;
   padding:12px;border-bottom:1px solid var(--line);cursor:pointer;font-size:14px;line-height:1.3}
 .saran .baris:last-child{border-bottom:0}
@@ -1780,14 +1783,6 @@ function pasangSaran(idInput, ambilDaftar, saatPilih){
     kotak.innerHTML = daftarKini.map((x,i)=>
       `<div class="baris" data-i="${i}"><span>${esc(x.label)}</span>` +
       (x.kanan ? `<span class="kanan">${esc(x.kanan)}</span>` : "") + `</div>`).join("");
-    kotak.querySelectorAll(".baris").forEach(el=>{
-      /* pointerdown + preventDefault supaya kotaknya tidak keburu tertutup
-         oleh blur sebelum ketukan terbaca */
-      el.addEventListener("pointerdown", e=>{
-        e.preventDefault();
-        pilih(daftarKini[Number(el.dataset.i)]);
-      });
-    });
     sorot = -1;
     kotak.classList.remove("hide");
   }
@@ -1799,9 +1794,33 @@ function pasangSaran(idInput, ambilDaftar, saatPilih){
     if(saatPilih) saatPilih(item);
   }
 
+  /* Menahan gerakan jari pada pointerdown akan membatalkan guliran,
+     jadi ketukan dibedakan dari geseran: dianggap ketukan bila jari
+     hampir tidak berpindah dan tidak lama menempel. */
+  let sedangSentuh = false, mulaiX = 0, mulaiY = 0, mulaiWaktu = 0, barisAwal = null;
+
+  kotak.addEventListener("pointerdown", e=>{
+    sedangSentuh = true;
+    barisAwal = e.target.closest(".baris");
+    mulaiX = e.clientX; mulaiY = e.clientY; mulaiWaktu = Date.now();
+  });
+  kotak.addEventListener("pointerup", e=>{
+    const baris = e.target.closest(".baris");
+    const geser = Math.abs(e.clientX - mulaiX) + Math.abs(e.clientY - mulaiY);
+    sedangSentuh = false;
+    if(baris && baris === barisAwal && geser < 12 && Date.now() - mulaiWaktu < 700){
+      pilih(daftarKini[Number(baris.dataset.i)]);
+    }
+    barisAwal = null;
+  });
+  /* jari terangkat di luar kotak setelah menggulir */
+  document.addEventListener("pointerup", ()=>{ sedangSentuh = false; });
+  document.addEventListener("pointercancel", ()=>{ sedangSentuh = false; });
+
   inp.addEventListener("focus", gambar);
   inp.addEventListener("input", gambar);
-  inp.addEventListener("blur", ()=> setTimeout(tutup, 150));
+  /* jangan menutup selama jari masih menggulir daftarnya */
+  inp.addEventListener("blur", ()=> setTimeout(()=>{ if(!sedangSentuh) tutup(); }, 200));
   inp.addEventListener("keydown", e=>{
     if(kotak.classList.contains("hide")) return;
     if(e.key === "ArrowDown" || e.key === "ArrowUp"){
