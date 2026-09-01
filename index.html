@@ -679,32 +679,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     </div>
   </div>
 
-  <div class="card">
-    <h2>💾 Cadangkan Data</h2>
-    <div class="note" style="margin-top:0">Data tersimpan di perangkat ini saja. Cadangkan secara berkala, dan pakai berkas yang sama untuk memindahkan data ke perangkat lain.</div>
-    <button class="primary block" id="btnKirimCadangan" style="margin-top:10px">📤 Kirim Cadangan ke Perangkat Lain</button>
-    <div class="btnrow">
-      <button id="btnExport">⬇️ Unduh Saja</button>
-      <button id="btnImport">⬆️ Pulihkan dari Berkas</button>
-    </div>
-    <input type="file" id="fileImport" accept="application/json,.json,text/plain,.txt" class="hide">
-    <div class="note" id="infoKirim">
-      Di HP, tombol di atas langsung memunculkan pilihan WhatsApp atau Drive.
-      Di laptop, berkasnya diunduh lalu Anda kirim sendiri.
-      Di perangkat tujuan: simpan berkasnya, buka aplikasi ini, tekan
-      <b>Pulihkan dari Berkas</b>, lalu pilih berkas itu.
-    </div>
-    <div class="note" id="infoPakai"></div>
-  </div>
 
-  <div class="card">
-    <h2>🧪 Data Contoh</h2>
-    <div class="note" style="margin-top:0">Isi aplikasi dengan katalog &amp; transaksi contoh untuk melihat cara kerjanya.</div>
-    <div class="btnrow">
-      <button id="btnDemo">Muat Data Contoh</button>
-      <button class="danger" id="btnReset">🗑️ Hapus Semua</button>
-    </div>
-  </div>
 </section>
 
 <pre id="cetakArea"></pre>
@@ -2803,6 +2778,13 @@ async function panggilCloud(aksi, muatan){
     headers: { "Content-Type": "text/plain;charset=utf-8" },
     body: JSON.stringify(Object.assign({ kunci: c.kunci, aksi }, muatan || {}))
   });
+  if(res.status === 404) throw new Error(
+    "Alamat tidak ditemukan (404). Penerbitan Web App-nya mungkin sudah dihapus, " +
+    "atau alamatnya kurang lengkap. Ambil ulang lewat Deploy → Manage deployments, " +
+    "kosongkan dulu kolom alamat, baru tempel yang baru.");
+  if(res.status === 401 || res.status === 403) throw new Error(
+    "Akses ditolak (" + res.status + "). Saat menerbitkan, \"Who has access\" harus " +
+    "disetel ke \"Anyone\" — bukan \"Anyone with Google account\".");
   if(!res.ok) throw new Error("Server menjawab " + res.status);
   const teks = await res.text();
   let objek;
@@ -3122,10 +3104,6 @@ document.getElementById("btnSalinLog").addEventListener("click", ()=>{
   salin(teks);
 });
 
-function namaCadangan(ext){
-  const toko = (db.profil.nama || "Toko").replace(/[^A-Za-z0-9]+/g, "-").replace(/^-|-$/g, "");
-  return `cadangan-nota-toko-${toko}-${hariIni()}.${ext}`;
-}
 function unduhBerkas(blob, nama){
   const a = document.createElement("a");
   a.href = URL.createObjectURL(blob);
@@ -3134,177 +3112,12 @@ function unduhBerkas(blob, nama){
   setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
 }
 
-document.getElementById("btnExport").addEventListener("click", ()=>{
-  unduhBerkas(new Blob([JSON.stringify(db)], {type:"application/json"}), namaCadangan("json"));
-  pesan("⬇️ Cadangan diunduh");
-});
 
 /* Berkas hanya bisa masuk WhatsApp lewat lembar berbagi bawaan sistem;
    wa.me cuma sanggup mengirim teks. Sistem membatasi jenis berkas yang
    boleh dibagikan, dan .txt paling luas diterima - maka dicoba lebih dulu. */
-document.getElementById("btnKirimCadangan").addEventListener("click", async ()=>{
-  const isi = JSON.stringify(db);
-  const ukuran = Math.round(new Blob([isi]).size / 1024);
-  const percobaan = [
-    { nama: namaCadangan("txt"),  tipe: "text/plain" },
-    { nama: namaCadangan("json"), tipe: "application/json" }
-  ];
 
-  let adaYangDitawarkan = false;
-  if(navigator.share && navigator.canShare){
-    for(const c of percobaan){
-      const berkas = new File([isi], c.nama, { type: c.tipe });
-      if(!navigator.canShare({ files: [berkas] })) continue;
-      adaYangDitawarkan = true;
-      try{
-        await navigator.share({ files: [berkas] });
-        catat("data", "Cadangan dikirim ke perangkat lain", `${ukuran} KB · ${db.nota.length} nota · ${c.nama}`);
-        simpan();
-        pesan("✅ Cadangan terkirim");
-        return;
-      }catch(e){
-        if(e.name === "AbortError") return;          /* dibatalkan pengguna */
-        /* jenis ini gagal - coba bentuk berikutnya */
-      }
-    }
-  }
 
-  /* tidak bisa mengirim berkas: diunduh, dan alasannya dijelaskan */
-  unduhBerkas(new Blob([isi], {type:"application/json"}), namaCadangan("json"));
-  document.getElementById("infoKirim").innerHTML = adaYangDitawarkan
-    ? "⚠️ Pengiriman ditolak sistem, jadi berkasnya diunduh. Kirim sendiri dari folder Unduhan."
-    : "ℹ️ Browser ini tidak bisa mengirim berkas langsung, jadi berkasnya diunduh. " +
-      "Kirim sendiri dari folder Unduhan — atau buka aplikasi ini di HP, di sana tombolnya " +
-      "langsung memunculkan pilihan WhatsApp.";
-  pesan("⬇️ Berkas diunduh");
-});
-document.getElementById("btnImport").addEventListener("click", ()=> document.getElementById("fileImport").click());
-document.getElementById("fileImport").addEventListener("change", e=>{
-  const f = e.target.files[0]; if(!f) return;
-  const fr = new FileReader();
-  fr.onload = ()=>{
-    try{
-      const d = JSON.parse(fr.result);
-      if(!d || typeof d!=="object" || !Array.isArray(d.nota) || !Array.isArray(d.katalog)) throw 0;
-      if(!confirm("Pulihkan data dari file ini? Data saat ini akan diganti.")) return;
-      const logLama = (db.log||[]).slice();
-      const kunciLama = db.kunci, masukLamaPulih = db.kunciMasuk;
-      db = Object.assign(kosong(), d);
-      /* log kedua sisi digabung agar jejak tidak hilang */
-      const sudah = new Set((db.log||[]).map(x=>x.id));
-      db.log = (db.log||[]).concat(logLama.filter(x=>!sudah.has(x.id)))
-                           .sort((a,b)=>String(b.waktu).localeCompare(String(a.waktu)));
-      if(!db.kunci || !db.kunci.hash) db.kunci = kunciLama;
-      db.kunciMasuk = masukLamaPulih;   /* sandi masuk perangkat ini yang dipakai, bukan dari berkas */
-      catat("data", "Pulihkan data dari cadangan",
-            `${(d.nota||[]).length} nota · ${(d.katalog||[]).length} item katalog`);
-      simpan(); isiProfil(); segarkanKartuKunci(); segarkanKartuMasuk(); keTab("kasir"); pesan("✅ Data dipulihkan");
-    }catch(err){ pesan("❌ File cadangan tidak valid"); }
-    e.target.value = "";
-  };
-  fr.readAsText(f);
-});
-
-document.getElementById("btnReset").addEventListener("click", ()=>{
-  if(!confirm("Hapus SEMUA data (katalog, nota, kas, utang)?")) return;
-  if(!confirm("Yakin? Sebaiknya unduh cadangan dulu.")) return;
-  const logLama = (db.log||[]).slice(), kunciLama = db.kunci, masukLama = db.kunciMasuk;
-  const ringkas = `${db.nota.length} nota · ${db.katalog.length} item · ${db.pelanggan.length} pelanggan`;
-  db = kosong(); db.log = logLama; db.kunci = kunciLama; db.kunciMasuk = masukLama;
-  catat("data", "HAPUS SEMUA DATA", ringkas + " dihapus. Log dan sandi dipertahankan.");
-  keranjang = []; simpan(); isiProfil(); segarkanKartuKunci(); segarkanKartuMasuk(); keTab("kasir"); pesan("Semua data dihapus");
-});
-
-document.getElementById("btnDemo").addEventListener("click", ()=>{
-  if(!confirm("Muat data contoh? Data saat ini akan ditimpa.")) return;
-  const d = new Date(), y = d.getFullYear(), m = d.getMonth();
-  const T = h => isoDari(new Date(y, m, h));
-  const akhirBulan = new Date(y, m+1, 0).getDate();
-  const H = n => T(Math.min(n, akhirBulan));
-
-  const logSebelum = (db.log||[]).slice(), kunciSebelum = db.kunci, masukSebelum = db.kunciMasuk;
-  db = kosong();
-  db.log = logSebelum; db.kunci = kunciSebelum; db.kunciMasuk = masukSebelum;
-  db.profil = {
-    nama:"Toko Berkah Jaya", alamat:"Jl. Raya No. 12, Bekasi", wa:"0812-3456-7890",
-    jam:"Senin–Sabtu, 08.00–17.00", penyusun:"", saldoAwal:5000000, tglMulai:H(1)
-  };
-  db.katalog = [
-    {id:"k1", jenis:"barang", nama:"Oli Mesin",   harga:50000,  satuan:"botol", stok:48, stokMin:10, desc:"Menjaga mesin tetap dingin dan halus, tarikan jadi lebih enteng.", foto:""},
-    {id:"k2", jenis:"barang", nama:"Filter Oli",  harga:45000,  satuan:"pcs",   stok:12, stokMin:5,  desc:"Menyaring kotoran sebelum masuk mesin, komponen dalam lebih awet.", foto:""},
-    {id:"k3", jenis:"barang", nama:"Aki Kering",  harga:320000, satuan:"unit",  stok:4,  stokMin:5,  desc:"Starter langsung nyala, bebas perawatan dan aman tanpa air aki.", foto:""},
-    {id:"k4", jenis:"jasa",   nama:"Servis Ringan", harga:100000, satuan:"kali", desc:"Tune-up cepat sekitar 45 menit, kendaraan kembali responsif dan irit.", foto:""},
-    {id:"k5", jenis:"jasa",   nama:"Servis Besar",  harga:450000, satuan:"kali", desc:"Pembongkaran dan pembersihan menyeluruh untuk mesin yang terasa berat.", foto:""},
-    {id:"k6", jenis:"jasa",   nama:"Cuci Kendaraan",harga:25000,  satuan:"kali", desc:"Bersih sampai sela-sela, tampilan kembali kinclong seperti baru.", foto:""}
-  ];
-  const I = (nama,jenis,satuan,harga,qty)=>({nama,jenis,satuan,harga,qty});
-  const urut = {};
-  const buat = (tgl, pelanggan, items, dTipe, dNilai, bayar, tempo, dp)=>{
-    const h = hitungNotaObj(items, dTipe, dNilai);
-    urut[tgl] = (urut[tgl]||0) + 1;
-    return {
-      id: uid(),
-      no: `NT-${tgl.replace(/-/g,"")}-${String(urut[tgl]).padStart(3,"0")}`,
-      tgl, pelanggan, items, diskonTipe:dTipe, diskonNilai:dNilai,
-      sBarang:h.sBarang, sJasa:h.sJasa, sub:h.sub, diskon:h.diskon, total:h.total,
-      dp: dp||0, bayar, tempo:tempo||"", bayaran:[]
-    };
-  };
-  db.pelanggan = [
-    {id:uid(), nama:"Bpk. Budi",     hp:"0812-1111-2222", kota:"Bekasi", alamat:"Jl. Melati No. 8",   catatan:"Langganan servis rutin"},
-    {id:uid(), nama:"Ibu Sari",      hp:"0813-3333-4444", kota:"Bekasi", alamat:"Jl. Anggrek No. 21", catatan:""},
-    {id:uid(), nama:"Bengkel Jaya",  hp:"0815-5555-6666", kota:"Cikarang", alamat:"Ruko Blok C-5",   catatan:"Beli partai besar"},
-    {id:uid(), nama:"Bpk. Ahmad",    hp:"0857-7777-8888", kota:"Bekasi", alamat:"", catatan:""},
-    {id:uid(), nama:"CV Maju Motor", hp:"0821-9999-0000", kota:"Tambun", alamat:"Jl. Industri No. 3", catatan:"Pembayaran via transfer"}
-  ];
-  const OLI  = q => I("Oli Mesin","barang","botol",50000,q);
-  const FIL  = q => I("Filter Oli","barang","pcs",45000,q);
-  const AKI  = q => I("Aki Kering","barang","unit",320000,q);
-  const SR   = q => I("Servis Ringan","jasa","kali",100000,q);
-  const SB   = q => I("Servis Besar","jasa","kali",450000,q);
-  const CUCI = q => I("Cuci Kendaraan","jasa","kali",25000,q);
-  const TEMPO_A = H(28), TEMPO_B = H(akhirBulan);
-
-  db.nota = [
-    buat(H(3),  "Bpk. Budi",     [OLI(2), SR(1)],          "persen", 10,     "tunai"),
-    buat(H(4),  "Umum",          [CUCI(3)],                "rp", 0,          "tunai"),
-    buat(H(5),  "Ibu Sari",      [FIL(2), OLI(2)],         "rp", 0,          "tunai"),
-    buat(H(6),  "Bengkel Jaya",  [AKI(3), SB(1)],          "rp", 50000,      "tunai"),
-    buat(H(8),  "Umum",          [SR(2)],                  "rp", 0,          "tunai"),
-    buat(H(9),  "Bpk. Ahmad",    [OLI(6), FIL(3)],         "rp", 0,          "tunai"),
-    buat(H(10), "Umum",          [SB(2)],                  "rp", 0,          "tunai"),
-    buat(H(11), "Ibu Sari",      [AKI(2)],                 "rp", 0,          "tunai"),
-    buat(H(13), "Umum",          [OLI(10), CUCI(4)],       "rp", 0,          "tunai"),
-    buat(H(15), "Bpk. Budi",     [SR(3), OLI(4)],          "rp", 0,          "kredit", TEMPO_A),
-    buat(H(17), "Umum",          [SB(1), FIL(1)],          "rp", 0,          "tunai"),
-    buat(H(19), "CV Maju Motor", [AKI(5)],                 "rp", 100000,     "tunai"),
-    buat(H(21), "Umum",          [SR(4), CUCI(6)],         "rp", 0,          "tunai"),
-    buat(H(23), "Bpk. Ahmad",    [OLI(8), FIL(4), SR(2)],  "rp", 0,          "tunai"),
-    buat(H(25), "Bengkel Jaya",  [SB(3), AKI(4)],          "rp", 130000,     "dp", TEMPO_B, 1000000),
-    buat(H(27), "Ibu Sari",      [OLI(5), CUCI(2)],        "rp", 0,          "tunai"),
-    buat(H(29), "Umum",          [SR(5), FIL(2)],          "rp", 0,          "kredit", TEMPO_B)
-  ].reverse();
-
-  db.keluar = [
-    {id:uid(), tgl:H(2),  kategori:"Peralatan & Sparepart", ket:"Belanja sparepart",      nominal:5000000, bayar:"tunai",  pihak:"", tempo:"", bayaran:[]},
-    {id:uid(), tgl:H(10), kategori:"Gaji & Upah",           ket:"Gaji 2 mekanik",         nominal:2000000, bayar:"tunai",  pihak:"", tempo:"", bayaran:[]},
-    {id:uid(), tgl:H(15), kategori:"Listrik & Air",         ket:"Tagihan listrik & air",  nominal:1000000, bayar:"tunai",  pihak:"", tempo:"", bayaran:[]},
-    {id:uid(), tgl:H(21), kategori:"Belanja Barang / Stok", ket:"Stok oli 1 dus",         nominal:2000000, bayar:"kredit", pihak:"Toko Grosir Makmur", tempo:TEMPO_A, bayaran:[]}
-  ];
-  db.hpManual = [
-    {id:uid(), jenis:"hutang", nama:"CV Sumber Oli", nominal:1200000, tempo:TEMPO_B, ket:"Sisa tagihan bulan lalu",
-     bayaran:[{id:uid(), tgl:H(26), jml:400000}]}
-  ];
-  /* nota DP Bengkel Jaya dicicil sekali: 2.500.000 - DP 1.000.000 - cicilan 500.000 = sisa 1.000.000 */
-  const notaDp = db.nota.find(n => n.bayar === "dp");
-  if(notaDp) notaDp.bayaran = [{id:uid(), tgl:H(28), jml:500000}];
-  catat("data", "Muat data contoh", "Data sebelumnya ditimpa");
-  simpan(); isiProfil();
-  const [a,z] = preset("bulan-ini");
-  document.getElementById("lDari").value = a;
-  document.getElementById("lSampai").value = z;
-  keTab("laporan"); pesan("✅ Data contoh dimuat");
-});
 
 /* ==========================================================
    PWA
@@ -3349,10 +3162,6 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   segarkanNoNota();
   if(!db.profil.tglMulai) db.profil.tglMulai = a;
 
-  document.getElementById("infoPakai").textContent =
-    location.protocol === "file:"
-      ? "ℹ️ Dibuka langsung dari file. Agar bisa dipasang sebagai aplikasi di HP, buka lewat alamat http (lihat berkas CARA-PAKAI.txt)."
-      : "";
 
   isiProfil();
   segarkanKartuKunci();

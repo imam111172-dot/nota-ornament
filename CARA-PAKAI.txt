@@ -142,8 +142,10 @@ Syarat: HP dan laptop tersambung ke WiFi yang sama.
       jadi riwayat belanjanya tidak terputus.
     - Menghapus pelanggan TIDAK menghapus notanya.
 
-  Ingin lihat contohnya dulu?
-  Tab "Atur" -> "Muat Data Contoh".
+  Mulailah dengan mengisi katalog dan saldo kas awal yang
+  sebenarnya. Aplikasi sengaja tidak lagi menyediakan data contoh
+  maupun tombol hapus semua, supaya data toko tidak bisa tertimpa
+  karena salah tekan.
 
 
 ========================================
@@ -168,11 +170,12 @@ MENGGANTI ATAU MEMATIKAN
   "Matikan". Keduanya tercatat di log.
 
 LUPA SANDI
-  Sandi TIDAK bisa dipulihkan. Pilihannya:
-    - pulihkan data dari berkas cadangan di perangkat lain, atau
-    - hapus data situs ini lewat pengaturan browser - tetapi
-      seluruh data toko di perangkat itu ikut hilang.
-  Karena itu rutinlah mengunduh cadangan.
+  Sandi TIDAK bisa dipulihkan. Jalan keluarnya: hapus data situs
+  ini lewat pengaturan browser, lalu ambil kembali datanya dengan
+  "Ambil dari Cloud" pada tab Atur.
+
+  Karena itu, pastikan data Anda sudah pernah dikirim ke cloud
+  sebelum memasang sandi.
 
 SEBERAPA AMAN
   Sandi disimpan teracak, bukan apa adanya. Tetapi kode aplikasi
@@ -205,7 +208,7 @@ YANG DICATAT
   - Kas       : pengeluaran, pemasukan lain, hutang-piutang manual
   - Pelanggan : tambah, ubah, hapus
   - Atur      : ubah profil bisnis, ubah saldo kas awal
-  - Data      : pulihkan cadangan, muat data contoh, hapus semua
+  - Data      : kirim dan ambil data dari cloud
 
 CARA MEMBUKA
   Tab "Atur" -> kartu "Log Aktivitas".
@@ -214,12 +217,10 @@ CARA MEMBUKA
   Di dalamnya ada pencarian, saringan per jenis, dan tombol
   "Salin Log" untuk menyalin isinya sebagai teks.
 
-LOG TIDAK IKUT TERHAPUS
-  Menekan "Hapus Semua Data" atau "Muat Data Contoh" TIDAK
-  menghapus log maupun sandinya. Tindakan itu justru ikut
-  tercatat di log, lengkap dengan berapa nota dan item yang
-  dihapus. Saat memulihkan cadangan, log dari berkas cadangan
-  digabung dengan log yang ada, bukan menimpanya.
+LOG TIDAK IKUT TERTIMPA
+  Saat mengambil data dari cloud, log dari server digabung dengan
+  log yang sudah ada di perangkat ini - bukan menimpanya. Jadi
+  jejak aktivitas tiap perangkat tetap terkumpul.
 
 SEBERAPA AMAN SANDI INI
   Sandi tidak disimpan apa adanya. Yang tersimpan hanya hasil
@@ -330,48 +331,24 @@ terbawa saat Anda mengirim berkas cadangan ke orang lain.
 ========================================
  I. PENTING - DATA ANDA
 ========================================
-Data tersimpan di dalam browser perangkat yang dipakai, bukan
-di internet. Artinya:
+Data tersimpan di dua tempat:
 
-  - Data di laptop dan di HP TERPISAH, tidak otomatis sama.
-  - Membuka lewat klik dua kali (file) dan lewat localhost
-    dihitung dua tempat penyimpanan berbeda. Pilih satu cara
-    dan pakai terus.
-  - Jika data browser dihapus, data aplikasi ikut hilang.
+  1. Di browser perangkat yang dipakai (tempat kerja sehari-hari)
+  2. Di Google Sheets Anda, setelah ditekan "Kirim ke Cloud"
 
-Karena itu rutin buka tab "Atur" -> bagian "Cadangkan Data".
+Artinya:
 
-APA SAJA YANG IKUT DALAM SATU BERKAS CADANGAN
-  Profil toko, katalog BERIKUT FOTONYA, pelanggan, seluruh nota,
-  pengeluaran, pemasukan lain, hutang-piutang, dan log aktivitas.
-  Semuanya menyatu dalam satu berkas - tidak ada yang terpisah,
-  jadi tidak mungkin ada yang tertinggal.
+  - Data di HP dan di laptop TIDAK otomatis sama. Yang
+    menyamakan hanyalah tombol Kirim dan Ambil.
+  - Kalau data browser terhapus, satu-satunya jalan pulih adalah
+    "Ambil dari Cloud". Maka biasakan Kirim ke Cloud setiap
+    selesai bekerja - itu kini satu-satunya cadangan Anda.
+  - Membersihkan data browser, memakai mode penyamaran, atau
+    berganti HP akan mengosongkan data di perangkat itu. Isi lagi
+    dengan Ambil dari Cloud.
 
-  Ukurannya kecil. Foto adalah bagian terbesar, sekitar 7-8 KB
-  per barang setelah diperkecil otomatis.
-
-MEMINDAHKAN DATA KE PERANGKAT LAIN
-  1. Di perangkat lama : "Kirim Cadangan ke Perangkat Lain",
-                         lalu pilih WhatsApp, Drive, atau email.
-  2. Di perangkat baru : simpan berkasnya, buka aplikasi ini,
-                         tekan "Pulihkan dari Berkas", pilih
-                         berkas tadi.
-
-  Di laptop tombol Kirim akan mengunduh berkasnya - kirim sendiri
-  dari folder Unduhan. Sebagian HP menolak berkas .json; kalau
-  begitu aplikasi otomatis mengirimnya sebagai .txt dengan isi
-  yang sama persis, dan tetap bisa dipulihkan seperti biasa.
-
-  Perhatikan: memulihkan akan MENGGANTI seluruh data di perangkat
-  tujuan, bukan menggabungkan.
-
-  Sandi masuk aplikasi sengaja TIDAK ikut dipulihkan. Yang berlaku
-  tetap sandi perangkat tempat Anda memulihkan, supaya Anda tidak
-  terkunci oleh sandi lama yang sudah terlupakan.
-
-JAGA BERKAS INI
-  Isinya nama, nomor HP, alamat pelanggan, dan besar hutang
-  mereka. Perlakukan seperti buku besar toko:
-    - JANGAN diunggah ke GitHub - repositorinya publik.
-    - Simpan di Drive pribadi, atau kirim ke WhatsApp diri
-      sendiri. Jangan ke grup.
+MENYALIN SPREADSHEETNYA
+  Isi spreadsheet di Drive Anda bisa disalin sendiri sebagai
+  cadangan tambahan: buka spreadsheetnya (lihat bagian H), lalu
+  File -> Make a copy. Ini berguna kalau suatu saat data di server
+  tertimpa dan Anda ingin kembali ke keadaan sebelumnya.
