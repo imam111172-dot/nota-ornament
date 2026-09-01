@@ -1,0 +1,11 @@
+# Foto asli bahan katalog - tidak dipakai aplikasi, tidak perlu ikut terbit
+poto barang/
+
+# Berkas cadangan data toko - JANGAN pernah diunggah, berisi data pelanggan
+cadangan-nota-toko-*.json
+*.backup.json
+
+# Sampah sistem
+Thumbs.db
+desktop.ini
+.DS_Store

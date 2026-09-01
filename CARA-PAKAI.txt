@@ -1,0 +1,210 @@
+========================================
+ NOTA TOKO - Kasir, Katalog & Laporan
+========================================
+
+ISI FOLDER
+  index.html ............. aplikasinya
+  manifest.webmanifest ... identitas aplikasi (nama + ikon)
+  sw.js .................. agar bisa dibuka tanpa internet
+  icon-*.png ............. ikon aplikasi
+  jalankan-server.bat .... untuk memasang jadi aplikasi berikon
+
+
+========================================
+ A. PAKAI DI LAPTOP
+========================================
+
+CARA CEPAT
+  Klik dua kali "index.html". Selesai.
+  Semua fitur jalan dan data tetap tersimpan walau browser
+  ditutup. Tidak perlu internet.
+
+CARA RAPI - jadi aplikasi berjendela sendiri
+  1. Klik dua kali "jalankan-server.bat".
+     Browser akan terbuka sendiri ke http://localhost:8931
+     Jika Windows menanyakan izin firewall, pilih "Allow".
+
+  2. Pasang sebagai aplikasi:
+     Chrome : menu titik tiga -> Cast, Save and Share
+              -> Install page as app
+     Edge   : menu titik tiga -> Apps
+              -> Install this site as an app
+
+  3. Aplikasi kini punya ikon sendiri di Desktop / menu Start,
+     terbuka di jendelanya sendiri tanpa address bar, dan
+     jalan tanpa internet.
+
+     Catatan: setelah terpasang, "jalankan-server.bat" tetap
+     perlu dijalankan lebih dulu setiap kali dipakai, karena
+     aplikasi dilayani dari folder ini.
+
+     Ingin benar-benar lepas dari server? Unggah isi folder ini
+     ke hosting gratis (Netlify Drop / GitHub Pages), lalu pasang
+     dari alamat web-nya. Setelah itu tidak perlu .bat lagi.
+
+
+========================================
+ B. PAKAI DI HP
+========================================
+Syarat: HP dan laptop tersambung ke WiFi yang sama.
+
+  1. Di laptop, klik dua kali "jalankan-server.bat".
+     Akan muncul alamat, contoh: http://192.168.1.200:8931
+
+  2. Di HP, buka Chrome, ketik alamat tersebut.
+
+  3. Menu titik tiga -> "Add to Home screen".
+
+  4. Selesai. Aplikasi punya ikon sendiri di layar HP.
+
+
+========================================
+ C. LANGKAH PERTAMA DI DALAM APLIKASI
+========================================
+  1. Tab "Atur"      : isi nama toko, alamat, nomor WA, lalu
+                       Saldo Kas Awal + tanggal mulai.
+  2. Tab "Katalog"   : masukkan barang dan jasa beserta harga,
+                       foto, dan penjelasan singkat.
+  3. Tab "Pelanggan" : isi nama, nomor HP/WA, dan alamat.
+                       Nomor HP membuat nota bisa dikirim
+                       langsung ke WhatsApp orangnya.
+  4. Tab "Kasir"     : pilih pelanggan -> pilih item -> atur
+                       jumlah -> isi diskon -> pilih status bayar
+                       -> Simpan & Buat Nota
+                       -> Salin / WhatsApp / Cetak.
+
+
+  TIGA STATUS PEMBAYARAN DI KASIR
+    LUNAS  : dibayar penuh. Seluruh uang masuk kas hari itu.
+
+    DP     : bayar sebagian. Isi jumlah uang mukanya, lalu
+             pilih tanggal jatuh tempo pelunasan.
+             -> uang muka langsung masuk kas hari itu
+             -> SISANYA otomatis jadi piutang pelanggan
+             Nota akan mencantumkan "Uang Muka (DP) dibayar"
+             dan "SISA YANG HARUS DIBAYAR".
+
+    BON    : belum bayar sama sekali. Seluruh nilai nota
+             jadi piutang, tidak ada uang masuk kas.
+
+    Untuk DP dan BON, nama pelanggan wajib diisi.
+
+
+  MENERIMA PEMBAYARAN PELANGGAN (boleh dicicil)
+    Buka tab "Utang" -> cari namanya -> tombol "Catat Bayar".
+    Muncul layar berisi nilai tagihan, sudah dibayar berapa,
+    dan sisanya.
+
+      - Isi jumlah yang dibayar. Kolom ini sudah terisi penuh
+        sebesar sisa, tinggal ubah kalau bayarnya sebagian.
+      - Tombol pintas: "Bayar lunas", "1/2 sisa", "1/3 sisa".
+      - Isi tanggal pembayarannya.
+
+    Boleh dicicil berapa kali pun. Tiap kali dicatat, sisanya
+    berkurang dan uangnya langsung masuk kas pada tanggal yang
+    Anda isi. Kalau sisa sudah nol, tagihan hilang sendiri dari
+    daftar dan nota berubah jadi LUNAS.
+
+    Salah catat? Tekan tanda "x" di riwayat cicilannya, atau
+    tombol "Hapus" di tab Kas. Tagihan akan kembali bertambah
+    sebesar itu.
+
+    Cara yang sama berlaku untuk membayar hutang ke supplier.
+
+  MELIHAT JEJAK UANGNYA
+    Tab "Kas" -> bagian "Pembayaran piutang & hutang" memuat
+    semua pembayaran: nama, nomor nota, tanggal, dan jumlahnya.
+    Tanda panah naik berarti uang masuk, panah turun uang keluar.
+
+    Catatan penting: nilai PENJUALAN tetap dihitung penuh sejak
+    nota dibuat, sedangkan KAS hanya menghitung uang yang benar-
+    benar sudah diterima. Jadi angka kas Anda tidak pernah
+    menggelembung oleh uang yang belum masuk.
+  5. Tab "Kas"       : catat pengeluaran dan pemasukan lain.
+  6. Tab "Utang"     : lihat piutang & hutang, tandai lunas.
+  7. Tab "Laporan"   : pilih periode -> Buat Teks Laporan -> kirim.
+
+
+  TENTANG TAB PELANGGAN
+    - Nama yang Anda ketik di Kasir otomatis masuk daftar
+      pelanggan, jadi daftarnya terisi sendiri sambil jalan.
+      Nama "Umum" sengaja tidak disimpan.
+    - Tiap pelanggan menampilkan jumlah transaksi, total
+      belanja, sisa piutang, dan tanggal belanja terakhir.
+    - Saringan "Punya Piutang" untuk melihat siapa saja yang
+      masih berhutang; tombol 💬 untuk chat WhatsApp langsung.
+    - Mengganti nama pelanggan ikut memperbarui nota lamanya,
+      jadi riwayat belanjanya tidak terputus.
+    - Menghapus pelanggan TIDAK menghapus notanya.
+
+  Ingin lihat contohnya dulu?
+  Tab "Atur" -> "Muat Data Contoh".
+
+
+========================================
+ D. LOG AKTIVITAS (BERSANDI)
+========================================
+Setiap perubahan dicatat otomatis, lengkap dengan nilai
+sebelum dan sesudahnya. Contoh baris log:
+
+    Ubah item "Roster Beton"
+    1 Sep 2026, 12.14
+    Harga: Rp 35.000 -> Rp 42.000
+
+YANG DICATAT
+  - Katalog   : tambah item, ubah harga/nama/satuan, hapus item
+  - Nota      : pembuatan nota dan penghapusannya
+  - Bayar     : cicilan/pelunasan masuk, dan penghapusannya
+  - Kas       : pengeluaran, pemasukan lain, hutang-piutang manual
+  - Pelanggan : tambah, ubah, hapus
+  - Atur      : ubah profil bisnis, ubah saldo kas awal
+  - Data      : pulihkan cadangan, muat data contoh, hapus semua
+
+CARA MEMBUKA
+  Tab "Atur" -> kartu "Log Aktivitas".
+  Pertama kali: buat sandi (minimal 4 karakter).
+  Berikutnya : ketik sandi -> "Buka Log".
+  Di dalamnya ada pencarian, saringan per jenis, dan tombol
+  "Salin Log" untuk menyalin isinya sebagai teks.
+
+LOG TIDAK IKUT TERHAPUS
+  Menekan "Hapus Semua Data" atau "Muat Data Contoh" TIDAK
+  menghapus log maupun sandinya. Tindakan itu justru ikut
+  tercatat di log, lengkap dengan berapa nota dan item yang
+  dihapus. Saat memulihkan cadangan, log dari berkas cadangan
+  digabung dengan log yang ada, bukan menimpanya.
+
+SEBERAPA AMAN SANDI INI
+  Sandi tidak disimpan apa adanya. Yang tersimpan hanya hasil
+  pengacakan SHA-256 berikut garamnya, jadi sandi Anda tidak
+  terbaca langsung dari data.
+
+  Namun perlu jujur: seluruh data tetap berada di dalam browser
+  perangkat ini. Orang yang paham teknis masih bisa membukanya
+  lewat alat pengembang browser tanpa tahu sandi Anda.
+
+  Jadi anggap kunci ini sebagai penghalang agar log tidak dibuka
+  sembarangan oleh karyawan - bukan pengaman tingkat tinggi.
+  JANGAN memakai sandi yang sama dengan sandi bank atau email.
+
+BELUM ADA: JUMLAH STOK
+  Aplikasi ini belum mencatat jumlah persediaan barang, jadi
+  perubahan stok belum bisa masuk log. Yang tercatat baru
+  perubahan data barangnya - terutama harga.
+
+
+========================================
+ E. PENTING - DATA ANDA
+========================================
+Data tersimpan di dalam browser perangkat yang dipakai, bukan
+di internet. Artinya:
+
+  - Data di laptop dan di HP TERPISAH, tidak otomatis sama.
+  - Membuka lewat klik dua kali (file) dan lewat localhost
+    dihitung dua tempat penyimpanan berbeda. Pilih satu cara
+    dan pakai terus.
+  - Jika data browser dihapus, data aplikasi ikut hilang.
+
+Karena itu rutin buka tab "Atur" -> "Unduh Cadangan".
+File cadangan itu dipakai untuk memulihkan data lewat tombol
+"Pulihkan", termasuk untuk memindahkan data dari laptop ke HP.

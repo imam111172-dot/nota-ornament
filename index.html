@@ -1,0 +1,2374 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f766e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Nota Toko">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>Nota Toko — Kasir, Katalog &amp; Laporan</title>
+<style>
+:root{
+  --bg:#f5f6f8; --card:#fff; --ink:#14181f; --muted:#697386; --line:#e3e6ec;
+  --brand:#0f766e; --brand-ink:#fff; --brand-soft:#e6f4f1;
+  --green:#15803d; --green-soft:#e8f6ec;
+  --red:#b91c1c; --red-soft:#fdecec;
+  --amber:#b45309; --amber-soft:#fdf3e3;
+  --r:14px;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#101317; --card:#191d23; --ink:#e9edf3; --muted:#98a2b3; --line:#282e37;
+    --brand:#2dd4bf; --brand-ink:#06201d; --brand-soft:#152a29;
+    --green:#4ade80; --green-soft:#14251a;
+    --red:#f87171; --red-soft:#2a1717;
+    --amber:#fbbf24; --amber-soft:#2a2113;
+  }
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);color:var(--ink);
+  font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px;line-height:1.5;-webkit-text-size-adjust:100%;
+}
+.wrap{max-width:620px;margin:0 auto;padding:0 14px 104px}
+
+header{position:sticky;top:0;z-index:20;background:var(--bg);padding:13px 0 9px;border-bottom:1px solid var(--line);margin-bottom:13px}
+header h1{font-size:17px;margin:0;line-height:1.25}
+header .sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:12px}
+.card h2{font-size:14px;margin:0 0 10px;letter-spacing:.2px}
+.card h3{font-size:12.5px;margin:16px 0 8px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px}
+
+.stat{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding:8px 0;border-bottom:1px dashed var(--line)}
+.stat:last-child{border-bottom:0}
+.stat .lbl{color:var(--muted);font-size:13.5px}
+.stat .val{font-weight:650;font-variant-numeric:tabular-nums;text-align:right}
+.stat.total{border-top:2px solid var(--line);border-bottom:0;margin-top:4px;padding-top:11px}
+.stat.total .lbl{color:var(--ink);font-weight:700;font-size:14px}
+.stat.total .val{font-size:19px}
+.pos{color:var(--green)}.neg{color:var(--red)}
+
+.hero{background:var(--brand-soft);border-color:transparent}
+.hero .kecil{font-size:12.5px;color:var(--muted)}
+.hero .besar{font-size:27px;font-weight:750;font-variant-numeric:tabular-nums;margin-top:2px;letter-spacing:-.5px}
+
+label{display:block;font-size:12.5px;color:var(--muted);margin:10px 0 4px;font-weight:600}
+input,select,textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:10px;background:var(--bg);color:var(--ink);font-size:16px;font-family:inherit}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:-1px}
+textarea{resize:vertical;line-height:1.55}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2>div>label:first-child{margin-top:10px}
+
+button{font-family:inherit;font-size:15px;font-weight:600;cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);padding:11px 14px;border-radius:10px}
+button.primary{background:var(--brand);color:var(--brand-ink);border-color:transparent}
+button.danger{background:var(--red-soft);color:var(--red);border-color:transparent}
+button.block{width:100%;margin-top:14px}
+.btnrow{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btnrow button{flex:1 1 130px}
+.mini{font-size:12px;padding:6px 10px;border-radius:8px}
+
+.item{display:flex;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid var(--line)}
+.item:last-child{border-bottom:0}
+.item .main{min-width:0;flex:1}
+.item .nm{font-weight:600;word-break:break-word}
+.item .meta{font-size:12.5px;color:var(--muted);margin-top:2px}
+.item .side{text-align:right;white-space:nowrap;display:flex;flex-direction:column;align-items:flex-end;gap:6px}
+.item .amt{font-weight:650;font-variant-numeric:tabular-nums}
+.kosong{color:var(--muted);font-size:13.5px;text-align:center;padding:20px 6px}
+
+.tag{display:inline-block;font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:99px;letter-spacing:.3px;vertical-align:middle}
+.tag.ok{background:var(--green-soft);color:var(--green)}
+.tag.warn{background:var(--amber-soft);color:var(--amber)}
+.tag.bad{background:var(--red-soft);color:var(--red)}
+.tag.info{background:var(--brand-soft);color:var(--brand)}
+
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.chips button{padding:7px 11px;font-size:12.5px;font-weight:600;border-radius:99px;flex:0 0 auto}
+.chips button.on{background:var(--brand);color:var(--brand-ink);border-color:transparent}
+.periode{display:flex;gap:8px;align-items:flex-end}
+.periode>div{flex:1}
+
+/* katalog kartu */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:4px}
+@media(max-width:330px){.grid{grid-template-columns:1fr}}
+.kartu{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--bg);display:flex;flex-direction:column}
+.kartu .foto{aspect-ratio:4/3;background:var(--brand-soft);display:flex;align-items:center;justify-content:center;font-size:11.5px;color:var(--muted);text-align:center;padding:8px;overflow:hidden}
+.kartu .foto img{width:100%;height:100%;object-fit:cover;display:block}
+.kartu .isi{padding:9px 10px 10px;flex:1;display:flex;flex-direction:column;gap:3px}
+.kartu .nm{font-weight:650;font-size:13.5px;line-height:1.3}
+.kartu .hg{font-weight:750;color:var(--brand);font-variant-numeric:tabular-nums;font-size:14px}
+.kartu .ds{font-size:11.5px;color:var(--muted);line-height:1.4}
+.kartu .aksi{display:flex;gap:6px;padding:0 10px 10px}
+.kartu .aksi button{flex:1;padding:7px 4px;font-size:12px;border-radius:8px}
+
+/* keranjang */
+.krj{display:flex;align-items:center;gap:9px;padding:10px 0;border-bottom:1px solid var(--line)}
+.krj:last-child{border-bottom:0}
+.krj .main{flex:1;min-width:0}
+.krj .nm{font-weight:600;font-size:14px;word-break:break-word}
+.krj .meta{font-size:12px;color:var(--muted)}
+.qty{display:flex;align-items:center;gap:0;border:1px solid var(--line);border-radius:9px;overflow:hidden;background:var(--card)}
+.qty button{border:0;background:transparent;padding:6px 10px;font-size:16px;font-weight:700;line-height:1;border-radius:0}
+.qty span{min-width:30px;text-align:center;font-weight:650;font-size:13.5px;font-variant-numeric:tabular-nums}
+.krj .amt{font-weight:650;font-size:13.5px;min-width:82px;text-align:right;font-variant-numeric:tabular-nums}
+
+pre.teks{white-space:pre-wrap;word-wrap:break-word;font-size:13.5px;line-height:1.6;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:14px;max-height:58vh;overflow:auto;font-family:inherit;margin:0}
+
+nav{position:fixed;left:0;right:0;bottom:0;z-index:30;background:var(--card);border-top:1px solid var(--line);display:flex;padding:6px 3px calc(6px + env(safe-area-inset-bottom))}
+nav button{flex:1;min-width:0;border:0;background:transparent;padding:6px 0;border-radius:10px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:9.5px;font-weight:600;color:var(--muted);white-space:nowrap;letter-spacing:-.2px}
+nav button .ic{font-size:17px;line-height:1}
+nav button.on{color:var(--brand);background:var(--brand-soft)}
+
+.hide{display:none!important}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:84px;z-index:60;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-size:13.5px;font-weight:600;box-shadow:0 6px 22px rgba(0,0,0,.22);opacity:0;pointer-events:none;transition:opacity .18s,transform .18s;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
+.note{font-size:12.5px;color:var(--muted);margin-top:8px}
+
+/* layar catat pembayaran */
+.modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
+.modalIsi{background:var(--card);border-radius:var(--r) var(--r) 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:620px;max-height:88vh;overflow:auto}
+@media(min-width:520px){.modal{align-items:center;padding:16px}.modalIsi{border-radius:var(--r)}}
+.modalIsi h2{font-size:15px;margin:0 0 12px}
+.bar2{height:8px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 4px}
+.bar2 i{display:block;height:100%;background:var(--green);border-radius:99px}
+.cicil{font-size:12px;color:var(--muted);padding:5px 0 5px 12px;border-left:2px solid var(--line);margin-top:4px}
+.cicil b{color:var(--ink);font-weight:650}
+.bar{position:sticky;bottom:70px;z-index:15;background:var(--card);border:1px solid var(--line);border-radius:var(--r);padding:12px;box-shadow:0 -2px 16px rgba(0,0,0,.06);margin-bottom:12px}
+
+@media print{
+  body{background:#fff;color:#000}
+  header,nav,.card,.toast,.bar{display:none!important}
+  #cetakArea{display:block!important;white-space:pre-wrap;font-size:12pt;padding:0;border:0;background:#fff;color:#000;max-height:none}
+  .wrap{padding:0;max-width:none}
+}
+#cetakArea{display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <h1 id="hdrNama">Nota Toko</h1>
+  <div class="sub" id="hdrSub">Kasir · Katalog · Laporan</div>
+</header>
+
+<!-- ==================== KASIR ==================== -->
+<section id="tab-kasir">
+  <div class="card">
+    <h2>🧾 Nota Baru</h2>
+    <div class="row2">
+      <div><label for="nPelanggan">Nama Pelanggan</label>
+        <input type="text" id="nPelanggan" list="daftarPelanggan" autocomplete="off" placeholder="Ketik / pilih dari daftar">
+        <datalist id="daftarPelanggan"></datalist>
+      </div>
+      <div><label for="nTgl">Tanggal</label><input type="date" id="nTgl"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>➕ Pilih Barang &amp; Jasa</h2>
+    <input type="search" id="cariItem" placeholder="🔎 Cari nama barang atau jasa…">
+    <div class="chips">
+      <button data-fk="semua" class="on">Semua</button>
+      <button data-fk="barang">📦 Barang</button>
+      <button data-fk="jasa">🛠️ Jasa</button>
+    </div>
+    <div id="pilihItem"></div>
+  </div>
+
+  <div class="card">
+    <h2>🛒 Isi Nota <span id="krjCount" style="color:var(--muted);font-weight:400"></span></h2>
+    <div id="listKeranjang"></div>
+
+    <h3>Diskon</h3>
+    <div class="periode">
+      <div style="flex:0 0 96px">
+        <select id="dTipe"><option value="rp">Rp</option><option value="persen">%</option></select>
+      </div>
+      <div><input type="text" id="dNilai" inputmode="numeric" class="uang" placeholder="0"></div>
+    </div>
+
+    <h3>Pembayaran</h3>
+    <div class="row2">
+      <div>
+        <label for="nMetode">Metode</label>
+        <select id="nMetode"><option>Tunai</option><option>Transfer</option><option>QRIS</option><option>Kartu Debit</option></select>
+      </div>
+      <div>
+        <label for="nStatus">Status</label>
+        <select id="nStatus">
+          <option value="tunai">LUNAS — bayar penuh</option>
+          <option value="dp">DP — bayar sebagian</option>
+          <option value="kredit">BON — belum bayar</option>
+        </select>
+      </div>
+    </div>
+    <div id="nDpBox" class="hide">
+      <label for="nDp">Uang muka / DP diterima (Rp)</label>
+      <input type="text" id="nDp" inputmode="numeric" class="uang" placeholder="0">
+      <div class="note" style="margin-top:6px">DP masuk kas hari ini. Sisanya otomatis jadi piutang pelanggan.</div>
+    </div>
+    <div id="nTempoBox" class="hide">
+      <label for="nTempo">Jatuh tempo pelunasan</label><input type="date" id="nTempo">
+    </div>
+
+    <div class="stat"><span class="lbl">Subtotal Barang</span><span class="val" id="sBarang">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Subtotal Jasa</span><span class="val" id="sJasa">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Subtotal</span><span class="val" id="sSub">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Diskon</span><span class="val neg" id="sDiskon">Rp 0</span></div>
+    <div class="stat total"><span class="lbl">GRAND TOTAL</span><span class="val" id="sTotal">Rp 0</span></div>
+    <div class="stat hide" id="rowDp"><span class="lbl">Uang muka (DP)</span><span class="val pos" id="sDp">Rp 0</span></div>
+    <div class="stat hide" id="rowSisa"><span class="lbl">Sisa — jadi piutang</span><span class="val neg" id="sSisa">Rp 0</span></div>
+
+    <div class="btnrow">
+      <button class="primary" id="btnSimpanNota">💾 Simpan &amp; Buat Nota</button>
+      <button id="btnKosongkan">🗑️ Kosongkan</button>
+    </div>
+  </div>
+
+  <div class="card hide" id="boxNota">
+    <h2>📄 Nota</h2>
+    <pre class="teks" id="hasilNota"></pre>
+    <div class="btnrow">
+      <button class="primary" id="btnSalinNota">📋 Salin</button>
+      <button id="btnWaPelanggan" class="hide">💬 Kirim ke Pelanggan</button>
+      <button id="btnWaNota">💬 WhatsApp</button>
+      <button id="btnCetakNota">🖨️ Cetak</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>📋 Riwayat Nota <span id="notaCount" style="color:var(--muted);font-weight:400"></span></h2>
+    <div id="listNota"></div>
+  </div>
+</section>
+
+<!-- ==================== KATALOG ==================== -->
+<section id="tab-katalog" class="hide">
+  <div class="card">
+    <h2>➕ Tambah / Ubah Item</h2>
+    <form id="formItem">
+      <input type="hidden" id="iId">
+      <label for="iJenis">Jenis</label>
+      <select id="iJenis"><option value="barang">📦 Barang</option><option value="jasa">🛠️ Jasa</option></select>
+
+      <label for="iNama">Nama item</label>
+      <input type="text" id="iNama" placeholder="Contoh: Oli Mesin" required>
+
+      <div class="row2">
+        <div><label for="iHarga">Harga (Rp)</label><input type="text" id="iHarga" inputmode="numeric" class="uang" placeholder="0" required></div>
+        <div><label for="iSatuan">Satuan</label><input type="text" id="iSatuan" list="dSatuan" value="pcs">
+          <datalist id="dSatuan"><option value="pcs"><option value="botol"><option value="unit"><option value="set"><option value="m"><option value="m2"><option value="kali"><option value="paket"></datalist>
+        </div>
+      </div>
+
+      <label for="iDesc">Penjelasan singkat (1 kalimat)</label>
+      <textarea id="iDesc" rows="2" maxlength="120" placeholder="Contoh: Menjaga mesin tetap dingin dan halus."></textarea>
+
+      <label for="iFoto">Foto item (opsional)</label>
+      <input type="file" id="iFoto" accept="image/*">
+      <div class="note" id="fotoInfo">Foto otomatis diperkecil agar hemat penyimpanan. Kosongkan bila belum ada.</div>
+      <div id="fotoPreview"></div>
+
+      <div class="btnrow">
+        <button type="submit" class="primary">💾 Simpan Item</button>
+        <button type="button" id="btnBatalItem">Batal</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>📦 Katalog Barang <span id="cBarang" style="color:var(--muted);font-weight:400"></span></h2>
+    <div class="grid" id="gridBarang"></div>
+  </div>
+
+  <div class="card">
+    <h2>🛠️ Katalog Jasa <span id="cJasa" style="color:var(--muted);font-weight:400"></span></h2>
+    <div class="grid" id="gridJasa"></div>
+  </div>
+
+  <div class="card">
+    <h2>📤 Katalog Siap Kirim</h2>
+    <div class="note" style="margin-top:0">Teks katalog format daftar ke bawah, siap ditempel ke WhatsApp atau status.</div>
+    <button class="primary block" id="btnBuatKatalog">Buat Teks Katalog</button>
+    <div class="hide" id="boxKatalog" style="margin-top:12px">
+      <pre class="teks" id="hasilKatalog"></pre>
+      <div class="btnrow">
+        <button class="primary" id="btnSalinKatalog">📋 Salin</button>
+        <button id="btnWaKatalog">💬 WhatsApp</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== PELANGGAN ==================== -->
+<section id="tab-pelanggan" class="hide">
+  <div class="card">
+    <h2>👥 Tambah / Ubah Pelanggan</h2>
+    <form id="formPelanggan">
+      <input type="hidden" id="pgId">
+      <label for="pgNama">Nama pelanggan</label>
+      <input type="text" id="pgNama" placeholder="Contoh: Bpk. Budi" required>
+      <div class="row2">
+        <div><label for="pgHp">No. HP / WhatsApp</label><input type="text" id="pgHp" inputmode="tel" placeholder="0812-3456-7890"></div>
+        <div><label for="pgKota">Kota / Wilayah</label><input type="text" id="pgKota" placeholder="Bekasi"></div>
+      </div>
+      <label for="pgAlamat">Alamat</label>
+      <input type="text" id="pgAlamat" placeholder="Jl. Melati No. 8">
+      <label for="pgCatatan">Catatan</label>
+      <input type="text" id="pgCatatan" placeholder="Contoh: langganan servis rutin">
+      <div class="btnrow">
+        <button type="submit" class="primary">💾 Simpan Pelanggan</button>
+        <button type="button" id="btnBatalPelanggan">Batal</button>
+      </div>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>📇 Daftar Pelanggan <span id="pgCount" style="color:var(--muted);font-weight:400"></span></h2>
+    <input type="search" id="cariPelanggan" placeholder="🔎 Cari nama atau nomor HP…">
+    <div class="chips">
+      <button data-fp="semua" class="on">Semua</button>
+      <button data-fp="piutang">Punya Piutang</button>
+      <button data-fp="sering">Paling Sering Belanja</button>
+    </div>
+    <div id="listPelanggan"></div>
+  </div>
+
+  <div class="card">
+    <h2>📤 Daftar Siap Kirim</h2>
+    <div class="note" style="margin-top:0">Rekap pelanggan beserta total belanja dan sisa piutangnya.</div>
+    <button class="primary block" id="btnBuatPelanggan" style="margin-top:0">Buat Teks Daftar Pelanggan</button>
+    <div class="hide" id="boxPelanggan" style="margin-top:12px">
+      <pre class="teks" id="hasilPelanggan"></pre>
+      <div class="btnrow">
+        <button class="primary" id="btnSalinPelanggan">📋 Salin</button>
+        <button id="btnWaDaftarPelanggan">💬 WhatsApp</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== KAS ==================== -->
+<section id="tab-kas" class="hide">
+  <div class="card">
+    <h2>💸 Catat Pengeluaran</h2>
+    <form id="formKeluar">
+      <label for="kTgl">Tanggal</label><input type="date" id="kTgl" required>
+      <label for="kKategori">Kategori</label>
+      <select id="kKategori">
+        <option>Belanja Barang / Stok</option><option>Bahan Baku</option>
+        <option>Peralatan &amp; Sparepart</option><option>Gaji &amp; Upah</option>
+        <option>Listrik &amp; Air</option><option>Sewa Tempat</option>
+        <option>Transport &amp; Kirim</option><option>Promosi</option><option>Lain-lain</option>
+      </select>
+      <label for="kKet">Keterangan</label><input type="text" id="kKet" placeholder="Contoh: Belanja sparepart" required>
+      <label for="kNominal">Nominal (Rp)</label><input type="text" id="kNominal" inputmode="numeric" class="uang" placeholder="0" required>
+      <label for="kBayar">Pembayaran</label>
+      <select id="kBayar"><option value="tunai">Tunai — uang keluar kas</option><option value="kredit">Hutang ke supplier</option></select>
+      <div id="kKreditBox" class="hide">
+        <label for="kSupplier">Nama supplier</label><input type="text" id="kSupplier" placeholder="Contoh: Toko Grosir Makmur">
+        <label for="kTempo">Jatuh tempo</label><input type="date" id="kTempo">
+      </div>
+      <button type="submit" class="primary block">Simpan Pengeluaran</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>➕ Pemasukan Lain</h2>
+    <div class="note" style="margin-top:0">Di luar penjualan. Contoh: tambahan modal, jual aset, komisi.</div>
+    <form id="formMasuk">
+      <div class="row2">
+        <div><label for="mTgl">Tanggal</label><input type="date" id="mTgl" required></div>
+        <div><label for="mNominal">Nominal (Rp)</label><input type="text" id="mNominal" inputmode="numeric" class="uang" placeholder="0" required></div>
+      </div>
+      <label for="mKet">Keterangan</label><input type="text" id="mKet" placeholder="Contoh: Tambahan modal" required>
+      <button type="submit" class="block">Simpan Pemasukan Lain</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>📋 Riwayat Kas</h2>
+    <h3>💵 Pembayaran piutang &amp; hutang</h3>
+    <div class="note" style="margin-top:0">Dicatat otomatis dari tab Utang. Uangnya sudah terhitung di laporan.</div>
+    <div id="listBayaran"></div>
+    <h3>Pengeluaran</h3><div id="listKeluar"></div>
+    <h3>Pemasukan lain</h3><div id="listMasuk"></div>
+  </div>
+</section>
+
+<!-- ==================== UTANG PIUTANG ==================== -->
+<section id="tab-utang" class="hide">
+  <div class="card">
+    <h2>🟢 Piutang — uang kita di pelanggan</h2>
+    <div class="stat total"><span class="lbl">Total belum lunas</span><span class="val pos" id="totPiutang">Rp 0</span></div>
+    <div id="listPiutang"></div>
+  </div>
+  <div class="card">
+    <h2>🔴 Hutang — kewajiban ke supplier</h2>
+    <div class="stat total"><span class="lbl">Total belum lunas</span><span class="val neg" id="totHutang">Rp 0</span></div>
+    <div id="listHutang"></div>
+  </div>
+  <div class="card">
+    <h2>✍️ Tambah Manual</h2>
+    <div class="note" style="margin-top:0">Untuk tagihan lama yang belum tercatat lewat Kasir / Kas.</div>
+    <form id="formHP">
+      <label for="hJenis">Jenis</label>
+      <select id="hJenis"><option value="piutang">Piutang — pelanggan berhutang ke kita</option><option value="hutang">Hutang — kita berhutang ke supplier</option></select>
+      <label for="hNama">Nama pelanggan / supplier</label><input type="text" id="hNama" required>
+      <div class="row2">
+        <div><label for="hNominal">Nominal (Rp)</label><input type="text" id="hNominal" inputmode="numeric" class="uang" placeholder="0" required></div>
+        <div><label for="hTempo">Jatuh tempo</label><input type="date" id="hTempo"></div>
+      </div>
+      <label for="hKet">Keterangan (opsional)</label><input type="text" id="hKet" placeholder="Contoh: Sisa tagihan Juli">
+      <button type="submit" class="primary block">Simpan</button>
+    </form>
+  </div>
+</section>
+
+<!-- ==================== LAPORAN ==================== -->
+<section id="tab-laporan" class="hide">
+  <div class="card">
+    <h2>🗓️ Periode</h2>
+    <div class="periode">
+      <div><label for="lDari">Dari</label><input type="date" id="lDari"></div>
+      <div><label for="lSampai">Sampai</label><input type="date" id="lSampai"></div>
+    </div>
+    <div class="chips">
+      <button data-lp="hari-ini">Hari Ini</button>
+      <button data-lp="bulan-ini">Bulan Ini</button>
+      <button data-lp="bulan-lalu">Bulan Lalu</button>
+      <button data-lp="tahun-ini">Tahun Ini</button>
+    </div>
+  </div>
+
+  <div class="card hero">
+    <div class="kecil">💰 Saldo Akhir Kas</div>
+    <div class="besar" id="rSaldo">Rp 0</div>
+    <div class="kecil" id="rNet" style="margin-top:6px">—</div>
+  </div>
+
+  <div class="card">
+    <h2>📊 Penjualan</h2>
+    <div class="stat"><span class="lbl">Transaksi berhasil</span><span class="val" id="rTrx">0</span></div>
+    <div class="stat"><span class="lbl">Total pendapatan</span><span class="val" id="rPend">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Rata-rata / transaksi</span><span class="val" id="rRata">Rp 0</span></div>
+    <h3>🏆 Terlaris</h3>
+    <div id="rTerlaris"></div>
+  </div>
+
+  <div class="card">
+    <h2>💰 Arus Kas</h2>
+    <div class="stat"><span class="lbl">Saldo awal</span><span class="val" id="rAwal">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Total pemasukan</span><span class="val pos" id="rMasuk">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Total pengeluaran</span><span class="val neg" id="rKeluar">Rp 0</span></div>
+    <div class="stat total"><span class="lbl">Saldo akhir</span><span class="val" id="rSaldo2">Rp 0</span></div>
+    <h3>🧾 Pengeluaran terbesar</h3>
+    <div id="rBesar"></div>
+  </div>
+
+  <div class="card">
+    <h2>📝 Belum Lunas</h2>
+    <div class="stat"><span class="lbl">Total piutang</span><span class="val pos" id="rPiutang">Rp 0</span></div>
+    <div class="stat"><span class="lbl">Total hutang</span><span class="val neg" id="rHutang">Rp 0</span></div>
+    <div class="stat total"><span class="lbl">Selisih posisi</span><span class="val" id="rSelisih">Rp 0</span></div>
+    <div class="note" id="rTempo"></div>
+  </div>
+
+  <div class="card">
+    <h2>📤 Laporan Siap Kirim</h2>
+    <button class="primary block" id="btnBuatLaporan" style="margin-top:0">Buat Teks Laporan</button>
+    <div class="hide" id="boxLaporan" style="margin-top:12px">
+      <pre class="teks" id="hasilLaporan"></pre>
+      <div class="btnrow">
+        <button class="primary" id="btnSalinLaporan">📋 Salin</button>
+        <button id="btnWaLaporan">💬 WhatsApp</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==================== ATUR ==================== -->
+<section id="tab-atur" class="hide">
+  <div class="card">
+    <h2>🏢 Profil Bisnis</h2>
+    <label for="sNama">Nama bisnis</label><input type="text" id="sNama" placeholder="Contoh: Toko Ornament Berkah Jaya">
+    <label for="sAlamat">Alamat</label><input type="text" id="sAlamat" placeholder="Contoh: Jl. Raya No. 12, Bekasi">
+    <label for="sWa">Nomor WhatsApp</label><input type="text" id="sWa" inputmode="tel" placeholder="Contoh: 0812-3456-7890">
+    <label for="sJam">Jam operasional</label><input type="text" id="sJam" placeholder="Contoh: Senin–Sabtu, 08.00–17.00">
+    <label for="sPenyusun">Nama penyusun laporan</label><input type="text" id="sPenyusun" placeholder="Contoh: Imam — Admin">
+    <button class="primary block" id="btnSimpanProfil">Simpan Profil</button>
+  </div>
+
+  <div class="card">
+    <h2>💵 Kas Awal</h2>
+    <div class="row2">
+      <div><label for="sSaldo">Saldo kas awal (Rp)</label><input type="text" id="sSaldo" inputmode="numeric" class="uang" placeholder="0"></div>
+      <div><label for="sMulai">Tanggal mulai</label><input type="date" id="sMulai"></div>
+    </div>
+    <div class="note">Saldo awal tiap periode dihitung otomatis dari transaksi sebelum tanggal periode.</div>
+    <button class="primary block" id="btnSimpanKas">Simpan</button>
+  </div>
+
+  <div class="card">
+    <h2>📲 Pasang di Layar HP</h2>
+    <div class="note" style="margin-top:0" id="infoInstall">
+      Buka aplikasi ini di Chrome HP, lalu menu ⋮ → <b>Add to Home screen</b>. Setelah itu aplikasi punya ikon sendiri dan bisa dibuka tanpa internet.
+    </div>
+    <button class="primary block hide" id="btnInstall">📲 Pasang Sekarang</button>
+  </div>
+
+  <div class="card">
+    <h2>🔒 Log Aktivitas</h2>
+    <div class="note" style="margin-top:0">
+      Mencatat setiap perubahan: harga, katalog, nota, pembayaran, kas, pelanggan, dan pengaturan.
+    </div>
+
+    <div id="kunciBelumAda">
+      <label for="sdBaru">Buat sandi untuk membuka log</label>
+      <input type="password" id="sdBaru" autocomplete="new-password" placeholder="Minimal 4 karakter">
+      <label for="sdUlang">Ulangi sandi</label>
+      <input type="password" id="sdUlang" autocomplete="new-password" placeholder="Ketik ulang">
+      <button class="primary block" id="btnBuatSandi">Simpan Sandi</button>
+    </div>
+
+    <div id="kunciSudahAda" class="hide">
+      <label for="sdMasuk">Sandi</label>
+      <input type="password" id="sdMasuk" autocomplete="current-password" placeholder="Masukkan sandi">
+      <div class="btnrow">
+        <button class="primary" id="btnBukaLog">🔓 Buka Log</button>
+        <button id="btnGantiSandi">Ganti Sandi</button>
+      </div>
+    </div>
+
+    <div class="note" style="border-top:1px solid var(--line);padding-top:10px;margin-top:14px">
+      ⚠️ <b>Sejauh mana ini mengamankan.</b> Sandi disimpan dalam bentuk teracak, bukan apa adanya —
+      jadi tidak terbaca begitu saja. Tetapi seluruh data tetap berada di browser perangkat ini,
+      sehingga orang yang paham teknis masih bisa membacanya lewat alat pengembang browser.
+      Anggap ini penghalang agar log tidak dibuka sembarangan, bukan pengaman tingkat tinggi.
+      Jangan memakai sandi yang sama dengan sandi bank atau email Anda.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>💾 Cadangkan Data</h2>
+    <div class="note" style="margin-top:0">Data tersimpan di perangkat ini saja. Unduh cadangan secara berkala.</div>
+    <div class="btnrow">
+      <button id="btnExport">⬇️ Unduh Cadangan</button>
+      <button id="btnImport">⬆️ Pulihkan</button>
+    </div>
+    <input type="file" id="fileImport" accept="application/json,.json" class="hide">
+    <div class="note" id="infoPakai"></div>
+  </div>
+
+  <div class="card">
+    <h2>🧪 Data Contoh</h2>
+    <div class="note" style="margin-top:0">Isi aplikasi dengan katalog &amp; transaksi contoh untuk melihat cara kerjanya.</div>
+    <div class="btnrow">
+      <button id="btnDemo">Muat Data Contoh</button>
+      <button class="danger" id="btnReset">🗑️ Hapus Semua</button>
+    </div>
+  </div>
+</section>
+
+<pre id="cetakArea"></pre>
+</div>
+
+<!-- ============ layar log aktivitas ============ -->
+<div class="modal hide" id="modalLog">
+  <div class="modalIsi">
+    <h2>🔒 Log Aktivitas <span id="logCount" style="color:var(--muted);font-weight:400"></span></h2>
+    <input type="search" id="cariLog" placeholder="🔎 Cari di log…">
+    <div class="chips" id="filterLog">
+      <button data-fl="semua" class="on">Semua</button>
+      <button data-fl="katalog">🛍️ Katalog</button>
+      <button data-fl="nota">🧾 Nota</button>
+      <button data-fl="bayar">💵 Bayar</button>
+      <button data-fl="kas">💸 Kas</button>
+      <button data-fl="pelanggan">👥 Pelanggan</button>
+      <button data-fl="atur">⚙️ Atur</button>
+      <button data-fl="data">💾 Data</button>
+    </div>
+    <div id="listLog" style="max-height:52vh;overflow:auto;margin-top:6px"></div>
+    <div class="btnrow">
+      <button class="primary" id="btnSalinLog">📋 Salin Log</button>
+      <button id="btnTutupLog">Tutup &amp; Kunci</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ layar catat pembayaran ============ -->
+<div class="modal hide" id="modalBayar">
+  <div class="modalIsi">
+    <h2 id="mbJudul">💵 Catat Pembayaran</h2>
+    <div id="mbInfo"></div>
+    <label for="mbJml">Jumlah yang dibayar (Rp)</label>
+    <input type="text" id="mbJml" inputmode="numeric" class="uang" placeholder="0">
+    <div class="chips">
+      <button type="button" id="mbSemua">Bayar lunas</button>
+      <button type="button" data-bagi="2">½ sisa</button>
+      <button type="button" data-bagi="3">⅓ sisa</button>
+    </div>
+    <label for="mbTgl">Tanggal pembayaran</label>
+    <input type="date" id="mbTgl">
+    <div class="btnrow">
+      <button class="primary" id="mbSimpan">💾 Simpan Pembayaran</button>
+      <button id="mbBatal">Batal</button>
+    </div>
+  </div>
+</div>
+
+<nav>
+  <button data-tab="kasir" class="on"><span class="ic">🧾</span>Kasir</button>
+  <button data-tab="katalog"><span class="ic">🛍️</span>Katalog</button>
+  <button data-tab="pelanggan"><span class="ic">👥</span>Pelanggan</button>
+  <button data-tab="kas"><span class="ic">💸</span>Kas</button>
+  <button data-tab="utang"><span class="ic">📝</span>Utang</button>
+  <button data-tab="laporan"><span class="ic">📊</span>Laporan</button>
+  <button data-tab="atur"><span class="ic">⚙️</span>Atur</button>
+</nav>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ==========================================================
+   PENYIMPANAN
+   ========================================================== */
+const KEY = "notaToko.v1";
+const kosong = () => ({
+  profil:{nama:"",alamat:"",wa:"",jam:"",penyusun:"",saldoAwal:0,tglMulai:""},
+  katalog:[], pelanggan:[], nota:[], keluar:[], masuk:[], hpManual:[],
+  log:[], kunci:{hash:"", garam:""}
+});
+let db = kosong();
+
+function muat(){
+  try{
+    const s = localStorage.getItem(KEY);
+    if(s) db = Object.assign(kosong(), JSON.parse(s));
+  }catch(e){}
+}
+function simpan(){
+  try{ localStorage.setItem(KEY, JSON.stringify(db)); return true; }
+  catch(e){ pesan("⚠️ Penyimpanan penuh — hapus beberapa foto katalog"); return false; }
+}
+let seq = 0;
+const uid = () => Date.now().toString(36) + (seq++).toString(36);
+
+/* ==========================================================
+   FORMAT
+   ========================================================== */
+const BLN = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+const BLN_P = ["Januari","Februari","Maret","April","Mei","Juni","Juli","Agustus","September","Oktober","November","Desember"];
+
+function rp(n){
+  const neg = n < -0.5;
+  const s = Math.round(Math.abs(n)).toString().replace(/\B(?=(\d{3})+(?!\d))/g,".");
+  return (neg?"-Rp ":"Rp ") + s;
+}
+function angka(n){
+  const b = Math.round(n*100)/100;
+  return (Number.isInteger(b) ? b.toString() : b.toString().replace(".",","));
+}
+function tglPendek(iso){
+  if(!iso) return "-";
+  const p = iso.split("-");
+  return `${parseInt(p[2],10)} ${BLN[parseInt(p[1],10)-1]} ${p[0]}`;
+}
+function tglPanjang(iso){
+  if(!iso) return "-";
+  const p = iso.split("-");
+  return `${parseInt(p[2],10)} ${BLN_P[parseInt(p[1],10)-1]} ${p[0]}`;
+}
+function isoDari(d){
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+}
+const hariIni = () => isoDari(new Date());
+
+function bersihAngka(v){
+  const n = parseFloat(String(v).replace(/[^\d.,-]/g,"").replace(/\./g,"").replace(",","."));
+  return isNaN(n) ? 0 : n;
+}
+function esc(s){
+  return String(s==null?"":s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function pasangUang(){
+  document.querySelectorAll("input.uang").forEach(inp=>{
+    if(inp.dataset.on) return;
+    inp.dataset.on = "1";
+    inp.addEventListener("input", ()=>{
+      const a = inp.value.replace(/\D/g,"");
+      inp.value = a ? a.replace(/\B(?=(\d{3})+(?!\d))/g,".") : "";
+    });
+  });
+}
+const nilaiUang = el => bersihAngka(el.value);
+const isiUang = (el,n) => { el.value = n ? Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g,".") : ""; };
+
+/* ==========================================================
+   LOG AKTIVITAS
+   Dicatat sebelum simpan(), agar ikut tersimpan bersama datanya.
+   ========================================================== */
+function catat(jenis, judul, rincian){
+  if(!Array.isArray(db.log)) db.log = [];
+  db.log.unshift({
+    id: uid(),
+    waktu: new Date().toISOString(),
+    jenis,                       // katalog | nota | bayar | kas | pelanggan | atur | data
+    judul,
+    rincian: rincian || ""
+  });
+  if(db.log.length > 2000) db.log.length = 2000;
+}
+function waktuPendek(iso){
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return String(iso||"-");
+  const jam = String(d.getHours()).padStart(2,"0") + "." + String(d.getMinutes()).padStart(2,"0");
+  return `${d.getDate()} ${BLN[d.getMonth()]} ${d.getFullYear()}, ${jam}`;
+}
+/* membandingkan dua nilai untuk dicatat sebagai "sebelum → sesudah" */
+function beda(label, lama, baru, format){
+  const f = format || (v => String(v==null||v==="" ? "(kosong)" : v));
+  return (String(lama||"") === String(baru||"")) ? null : `${label}: ${f(lama)} → ${f(baru)}`;
+}
+
+function pesan(t){
+  const el = document.getElementById("toast");
+  el.textContent = t; el.classList.add("show");
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove("show"), 2400);
+}
+async function salin(teks){
+  try{ await navigator.clipboard.writeText(teks); pesan("📋 Teks disalin"); return; }catch(e){}
+  const ta = document.createElement("textarea");
+  ta.value = teks; ta.style.position="fixed"; ta.style.opacity="0";
+  document.body.appendChild(ta); ta.select();
+  try{ document.execCommand("copy"); pesan("📋 Teks disalin"); }
+  catch(e){ pesan("Salin manual: tekan lama pada teks"); }
+  document.body.removeChild(ta);
+}
+const kirimWa = t => window.open("https://wa.me/?text="+encodeURIComponent(t), "_blank");
+
+/* ==========================================================
+   PERHITUNGAN NOTA
+   ========================================================== */
+const barisTotal = b => (Number(b.qty)||0) * (Number(b.harga)||0);
+
+function hitungNotaObj(items, dTipe, dNilai){
+  const sBarang = items.filter(x=>x.jenis==="barang").reduce((s,x)=>s+barisTotal(x),0);
+  const sJasa   = items.filter(x=>x.jenis==="jasa").reduce((s,x)=>s+barisTotal(x),0);
+  const sub = sBarang + sJasa;
+  let diskon = dTipe==="persen" ? sub*(dNilai/100) : dNilai;
+  diskon = Math.min(Math.max(diskon,0), sub);
+  return {sBarang, sJasa, sub, diskon, total: sub - diskon};
+}
+
+/* ==========================================================
+   ARUS KAS
+   Masuk : nota LUNAS pada tanggalnya · pelunasan piutang · pemasukan lain
+   Keluar: pengeluaran tunai pada tanggalnya · pelunasan hutang
+   ========================================================== */
+/* uang muka yang diterima di tanggal nota */
+const dpNota = n => n.bayar==="tunai" ? n.total : Math.min(Number(n.dp)||0, n.total);
+/* jumlah seluruh cicilan yang sudah masuk */
+const cicilan = o => (o.bayaran||[]).reduce((s,b)=>s+(Number(b.jml)||0), 0);
+/* nilai tagihan penuh: nota pakai .total, hutang/piutang lain pakai .nominal */
+const nilaiTagihan = o => Number(o.total !== undefined ? o.total : o.nominal) || 0;
+/* sudah dibayar berapa */
+const terbayar = o => o.bayar==="tunai" ? nilaiTagihan(o) : (Number(o.dp)||0) + cicilan(o);
+/* sisa yang belum dibayar */
+const sisaTagihan = o => Math.max(nilaiTagihan(o) - terbayar(o), 0);
+const sisaNota = sisaTagihan;
+const sudahLunas = o => sisaTagihan(o) <= 0;
+
+/* Data lama memakai penanda tglLunas (lunas sekaligus).
+   Diubah menjadi satu baris pembayaran agar seragam dengan cicilan. */
+function migrasiPembayaran(){
+  let ubah = false;
+  const perbaiki = o => {
+    if(!Array.isArray(o.bayaran)){ o.bayaran = []; ubah = true; }
+    if(o.tglLunas){
+      const sisa = nilaiTagihan(o) - ((Number(o.dp)||0) + cicilan(o));
+      if(sisa > 0) o.bayaran.push({id:uid(), tgl:o.tglLunas, jml:sisa});
+      o.tglLunas = "";
+      ubah = true;
+    }
+  };
+  db.nota.forEach(n => { if(n.bayar!=="tunai") perbaiki(n); });
+  db.keluar.forEach(k => { if(k.bayar==="kredit") perbaiki(k); });
+  db.hpManual.forEach(perbaiki);
+  if(ubah) simpan();
+}
+
+/* seluruh pembayaran cicilan/pelunasan — dipakai kas dan riwayat */
+function daftarPembayaran(){
+  const o = [];
+  db.nota.forEach(n=>{
+    if(n.bayar==="tunai") return;
+    (n.bayaran||[]).forEach(b=> o.push({
+      arah:"masuk", src:"nota", indukId:n.id, bayarId:b.id, tgl:b.tgl, jml:b.jml,
+      nama:n.pelanggan, ket:`Pembayaran piutang · ${n.no}`
+    }));
+  });
+  db.hpManual.filter(h=>h.jenis==="piutang").forEach(h=>{
+    (h.bayaran||[]).forEach(b=> o.push({
+      arah:"masuk", src:"manual", indukId:h.id, bayarId:b.id, tgl:b.tgl, jml:b.jml,
+      nama:h.nama, ket:"Pembayaran piutang"
+    }));
+  });
+  db.keluar.filter(k=>k.bayar==="kredit").forEach(k=>{
+    (k.bayaran||[]).forEach(b=> o.push({
+      arah:"keluar", src:"keluar", indukId:k.id, bayarId:b.id, tgl:b.tgl, jml:b.jml,
+      nama:k.pihak, ket:`Pembayaran hutang · ${k.ket}`, kategori:k.kategori
+    }));
+  });
+  db.hpManual.filter(h=>h.jenis==="hutang").forEach(h=>{
+    (h.bayaran||[]).forEach(b=> o.push({
+      arah:"keluar", src:"manual", indukId:h.id, bayarId:b.id, tgl:b.tgl, jml:b.jml,
+      nama:h.nama, ket:"Pembayaran hutang", kategori:"Pelunasan Hutang"
+    }));
+  });
+  return o.sort((a,b)=>(b.tgl||"").localeCompare(a.tgl||""));
+}
+
+function arusMasuk(){
+  const o = [];
+  db.nota.forEach(n=>{
+    if(n.bayar==="tunai"){ o.push({tgl:n.tgl, jml:n.total, ket:"Penjualan "+n.no}); return; }
+    const dp = dpNota(n);
+    if(dp > 0) o.push({tgl:n.tgl, jml:dp, ket:`Uang muka ${n.no} — ${n.pelanggan}`});
+  });
+  daftarPembayaran().filter(p=>p.arah==="masuk")
+    .forEach(p=> o.push({tgl:p.tgl, jml:p.jml, ket:`${p.ket} — ${p.nama}`}));
+  db.masuk.forEach(m=> o.push({tgl:m.tgl, jml:m.nominal, ket:m.ket}));
+  return o;
+}
+function arusKeluar(){
+  const o = [];
+  db.keluar.forEach(k=>{
+    if(k.bayar==="tunai") o.push({tgl:k.tgl, jml:k.nominal, ket:k.ket, kategori:k.kategori});
+  });
+  daftarPembayaran().filter(p=>p.arah==="keluar")
+    .forEach(p=> o.push({tgl:p.tgl, jml:p.jml, ket:`${p.ket} — ${p.nama}`, kategori:p.kategori}));
+  return o;
+}
+
+/* satu baris tagihan yang belum lunas, lengkap dengan riwayat cicilannya */
+function barisTagihan(o, src, nama, ketDasar){
+  const nilai = nilaiTagihan(o), sudah = terbayar(o);
+  return {
+    id:o.id, src, nama: nama||"(tanpa nama)", nominal: sisaTagihan(o),
+    tempo:o.tempo||"", ket:ketDasar||"", nilai, sudah,
+    bayaran:(o.bayaran||[]).slice().sort((a,b)=>(a.tgl||"").localeCompare(b.tgl||""))
+  };
+}
+function daftarPiutang(){
+  const a = db.nota.filter(n=>n.bayar!=="tunai" && sisaTagihan(n)>0)
+    .map(n=> barisTagihan(n, "nota", n.pelanggan, n.no));
+  const b = db.hpManual.filter(h=>h.jenis==="piutang" && sisaTagihan(h)>0)
+    .map(h=> barisTagihan(h, "manual", h.nama, h.ket||""));
+  return a.concat(b).sort((x,y)=>(x.tempo||"9999-99-99").localeCompare(y.tempo||"9999-99-99"));
+}
+function daftarHutang(){
+  const a = db.keluar.filter(k=>k.bayar==="kredit" && sisaTagihan(k)>0)
+    .map(k=> barisTagihan(k, "keluar", k.pihak, k.ket));
+  const b = db.hpManual.filter(h=>h.jenis==="hutang" && sisaTagihan(h)>0)
+    .map(h=> barisTagihan(h, "manual", h.nama, h.ket||""));
+  return a.concat(b).sort((x,y)=>(x.tempo||"9999-99-99").localeCompare(y.tempo||"9999-99-99"));
+}
+
+function hitung(dari, sampai){
+  const dlm = t => t && t>=dari && t<=sampai;
+  const notaP = db.nota.filter(n=>dlm(n.tgl));
+  const pendapatan = notaP.reduce((s,n)=>s+n.total,0);
+
+  const per = {};
+  notaP.forEach(n=> (n.items||[]).forEach(b=>{
+    const k = (b.nama||"-").trim()+"|"+b.jenis;
+    if(!per[k]) per[k] = {nama:b.nama, jenis:b.jenis, satuan:b.satuan||"pcs", qty:0, nilai:0};
+    per[k].qty += Number(b.qty)||0;
+    per[k].nilai += barisTotal(b);
+  }));
+  const terlaris = Object.values(per).sort((a,b)=>b.qty-a.qty || b.nilai-a.nilai);
+
+  const masuk = arusMasuk(), keluar = arusKeluar();
+  const seb = t => t && t < dari;
+  const net0 = masuk.filter(x=>seb(x.tgl)).reduce((s,x)=>s+x.jml,0)
+             - keluar.filter(x=>seb(x.tgl)).reduce((s,x)=>s+x.jml,0);
+  const mulai = db.profil.tglMulai || "0000-01-01";
+  const saldoAwal = db.profil.saldoAwal + (dari > mulai ? net0 : 0);
+
+  const mP = masuk.filter(x=>dlm(x.tgl)), kP = keluar.filter(x=>dlm(x.tgl));
+  const totalMasuk = mP.reduce((s,x)=>s+x.jml,0);
+  const totalKeluar = kP.reduce((s,x)=>s+x.jml,0);
+
+  const perKat = {};
+  kP.forEach(x=>{ const k = x.kategori||"Lain-lain"; perKat[k] = (perKat[k]||0)+x.jml; });
+
+  const piutang = daftarPiutang(), hutang = daftarHutang();
+  return {
+    dari, sampai, trx:notaP.length, pendapatan,
+    rata: notaP.length ? pendapatan/notaP.length : 0,
+    terlaris, saldoAwal, totalMasuk, totalKeluar,
+    saldoAkhir: saldoAwal + totalMasuk - totalKeluar,
+    keluarBesar: kP.slice().sort((a,b)=>b.jml-a.jml),
+    katBesar: Object.entries(perKat).map(([nama,jml])=>({nama,jml})).sort((a,b)=>b.jml-a.jml),
+    piutang, hutang,
+    totalPiutang: piutang.reduce((s,x)=>s+x.nominal,0),
+    totalHutang: hutang.reduce((s,x)=>s+x.nominal,0)
+  };
+}
+
+/* ==========================================================
+   NAVIGASI
+   ========================================================== */
+const TABS = ["kasir","katalog","pelanggan","kas","utang","laporan","atur"];
+function keTab(n){
+  TABS.forEach(t=>document.getElementById("tab-"+t).classList.toggle("hide", t!==n));
+  document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on", b.dataset.tab===n));
+  window.scrollTo(0,0);
+  if(n==="kasir")     { gambarPilihItem(); gambarKeranjang(); gambarRiwayatNota(); isiDatalistPelanggan(); }
+  if(n==="katalog")   gambarKatalog();
+  if(n==="pelanggan") gambarPelanggan();
+  if(n==="kas")       gambarKas();
+  if(n==="utang")     gambarUtang();
+  if(n==="laporan")   gambarLaporan();
+}
+document.querySelectorAll("nav button").forEach(b=> b.addEventListener("click", ()=>keTab(b.dataset.tab)));
+
+/* ==========================================================
+   KATALOG
+   ========================================================== */
+let fotoSementara = null;
+
+document.getElementById("iFoto").addEventListener("change", e=>{
+  const f = e.target.files[0];
+  if(!f){ fotoSementara = null; document.getElementById("fotoPreview").innerHTML=""; return; }
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    const img = new Image();
+    img.onload = ()=>{
+      const maks = 640;
+      let w = img.width, h = img.height;
+      if(w > h && w > maks){ h = Math.round(h*maks/w); w = maks; }
+      else if(h >= w && h > maks){ w = Math.round(w*maks/h); h = maks; }
+      const c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      c.getContext("2d").drawImage(img, 0, 0, w, h);
+      fotoSementara = c.toDataURL("image/jpeg", 0.72);
+      document.getElementById("fotoPreview").innerHTML =
+        `<div class="kartu" style="max-width:180px;margin-top:8px"><div class="foto"><img src="${fotoSementara}" alt=""></div></div>`;
+      document.getElementById("fotoInfo").textContent =
+        `Foto siap (${Math.round(fotoSementara.length/1024)} KB setelah diperkecil).`;
+    };
+    img.onerror = ()=> pesan("❌ Gambar tidak terbaca");
+    img.src = fr.result;
+  };
+  fr.readAsDataURL(f);
+});
+
+document.getElementById("formItem").addEventListener("submit", e=>{
+  e.preventDefault();
+  const id = document.getElementById("iId").value;
+  const data = {
+    jenis: document.getElementById("iJenis").value,
+    nama: document.getElementById("iNama").value.trim(),
+    harga: nilaiUang(document.getElementById("iHarga")),
+    satuan: document.getElementById("iSatuan").value.trim() || "pcs",
+    desc: document.getElementById("iDesc").value.trim()
+  };
+  if(!data.nama || !data.harga){ pesan("Lengkapi nama dan harga"); return; }
+  if(id){
+    const it = db.katalog.find(x=>x.id===id);
+    if(it){
+      const ubah = [
+        beda("Nama", it.nama, data.nama),
+        beda("Harga", it.harga, data.harga, rp),
+        beda("Satuan", it.satuan, data.satuan),
+        beda("Jenis", it.jenis, data.jenis),
+        beda("Penjelasan", it.desc, data.desc)
+      ].filter(Boolean);
+      if(fotoSementara) ubah.push("Foto diganti");
+      Object.assign(it, data);
+      if(fotoSementara) it.foto = fotoSementara;
+      if(ubah.length) catat("katalog", `Ubah item "${data.nama}"`, ubah.join(" · "));
+    }
+  }else{
+    db.katalog.push(Object.assign({id:uid(), foto: fotoSementara||""}, data));
+    catat("katalog", `Tambah ${data.jenis} "${data.nama}"`, `Harga ${rp(data.harga)} / ${data.satuan}`);
+  }
+  if(simpan()){ pesan("✅ Item tersimpan"); resetFormItem(); gambarKatalog(); }
+});
+
+function resetFormItem(){
+  document.getElementById("formItem").reset();
+  document.getElementById("iId").value = "";
+  document.getElementById("iSatuan").value = "pcs";
+  document.getElementById("fotoPreview").innerHTML = "";
+  document.getElementById("fotoInfo").textContent = "Foto otomatis diperkecil agar hemat penyimpanan. Kosongkan bila belum ada.";
+  fotoSementara = null;
+}
+document.getElementById("btnBatalItem").addEventListener("click", resetFormItem);
+
+function kartuItem(it){
+  return `<div class="kartu">
+    <div class="foto">${ it.foto
+      ? `<img src="${it.foto}" alt="${esc(it.nama)}">`
+      : `📷<br>Belum ada foto` }</div>
+    <div class="isi">
+      <div class="nm">${esc(it.nama)}</div>
+      <div class="hg">${rp(it.harga)} <span style="font-weight:400;color:var(--muted);font-size:11.5px">/ ${esc(it.satuan)}</span></div>
+      ${it.desc ? `<div class="ds">${esc(it.desc)}</div>` : ""}
+    </div>
+    <div class="aksi">
+      <button data-ubah="${it.id}">✏️ Ubah</button>
+      <button class="danger" data-hapus-item="${it.id}">Hapus</button>
+    </div>
+  </div>`;
+}
+function gambarKatalog(){
+  const B = db.katalog.filter(x=>x.jenis==="barang");
+  const J = db.katalog.filter(x=>x.jenis==="jasa");
+  document.getElementById("cBarang").textContent = B.length ? `(${B.length})` : "";
+  document.getElementById("cJasa").textContent   = J.length ? `(${J.length})` : "";
+  document.getElementById("gridBarang").innerHTML = B.length ? B.map(kartuItem).join("")
+    : `<div class="kosong" style="grid-column:1/-1">Belum ada barang. Tambahkan di atas.</div>`;
+  document.getElementById("gridJasa").innerHTML = J.length ? J.map(kartuItem).join("")
+    : `<div class="kosong" style="grid-column:1/-1">Belum ada jasa. Tambahkan di atas.</div>`;
+
+  document.querySelectorAll("[data-ubah]").forEach(b=> b.onclick = ()=>{
+    const it = db.katalog.find(x=>x.id===b.dataset.ubah); if(!it) return;
+    document.getElementById("iId").value = it.id;
+    document.getElementById("iJenis").value = it.jenis;
+    document.getElementById("iNama").value = it.nama;
+    isiUang(document.getElementById("iHarga"), it.harga);
+    document.getElementById("iSatuan").value = it.satuan;
+    document.getElementById("iDesc").value = it.desc||"";
+    fotoSementara = null;
+    document.getElementById("fotoPreview").innerHTML = it.foto
+      ? `<div class="kartu" style="max-width:180px;margin-top:8px"><div class="foto"><img src="${it.foto}" alt=""></div></div>` : "";
+    window.scrollTo({top:0, behavior:"smooth"});
+    pesan("Mengubah: "+it.nama);
+  });
+  document.querySelectorAll("[data-hapus-item]").forEach(b=> b.onclick = ()=>{
+    const it = db.katalog.find(x=>x.id===b.dataset.hapusItem);
+    if(!it || !confirm(`Hapus "${it.nama}" dari katalog?`)) return;
+    catat("katalog", `Hapus item "${it.nama}"`, `Harga terakhir ${rp(it.harga)} / ${it.satuan}`);
+    db.katalog = db.katalog.filter(x=>x.id!==b.dataset.hapusItem);
+    simpan(); gambarKatalog(); pesan("Item dihapus");
+  });
+}
+
+function teksKatalog(){
+  const p = db.profil, B = [];
+  const t = s => B.push(s);
+  t("🛍️ *KATALOG PRODUK & JASA*");
+  t("");
+  t(p.nama || "[Nama Bisnis]");
+  t("");
+  t("_Harga sewaktu-waktu dapat berubah._");
+
+  const bagian = (judul, arr)=>{
+    t("");
+    t("———————————————");
+    t("");
+    t(judul);
+    t("");
+    if(!arr.length){ t("   (belum ada item)"); t(""); return; }
+    arr.forEach(it=>{
+      t("———————————————");
+      t("");
+      t(`[📷 Masukkan Gambar: ${it.nama}]`);
+      t("");
+      t(`*${it.nama}*`);
+      t("");
+      t(`💰 *${rp(it.harga)}* / ${it.satuan}`);
+      t("");
+      if(it.desc){ t(`✨ ${it.desc}`); t(""); }
+    });
+  };
+  bagian("*📦 KATALOG BARANG*", db.katalog.filter(x=>x.jenis==="barang"));
+  bagian("*🛠️ KATALOG JASA*",  db.katalog.filter(x=>x.jenis==="jasa"));
+
+  t("———————————————");
+  t("");
+  if(p.wa)     t(`📲 Pesan sekarang: ${p.wa}`);
+  if(p.alamat) t(`📍 Alamat: ${p.alamat}`);
+  if(p.jam)    t(`🕒 Buka: ${p.jam}`);
+  t("");
+  t("Terima kasih 🙏");
+  return B.join("\n");
+}
+document.getElementById("btnBuatKatalog").addEventListener("click", ()=>{
+  if(!db.katalog.length){ pesan("Katalog masih kosong"); return; }
+  document.getElementById("hasilKatalog").textContent = teksKatalog();
+  document.getElementById("boxKatalog").classList.remove("hide");
+  pesan("✅ Teks katalog dibuat");
+});
+document.getElementById("btnSalinKatalog").addEventListener("click", ()=> salin(document.getElementById("hasilKatalog").textContent));
+document.getElementById("btnWaKatalog").addEventListener("click", ()=> kirimWa(document.getElementById("hasilKatalog").textContent));
+
+/* ==========================================================
+   PELANGGAN
+   ========================================================== */
+/* 08xx / +62xx / 8xx  ->  62xx  (format yang dipakai wa.me) */
+function normalHp(hp){
+  let s = String(hp||"").replace(/[^\d+]/g,"").replace(/\+/g,"");
+  if(!s) return "";
+  if(s.startsWith("0"))      s = "62" + s.slice(1);
+  else if(s.startsWith("8")) s = "62" + s;
+  return s;
+}
+const kunciNama = s => String(s||"").trim().toLowerCase();
+const cariPelanggan = nama => db.pelanggan.find(p => kunciNama(p.nama) === kunciNama(nama)) || null;
+
+function statPelanggan(nama){
+  const L = db.nota.filter(n => kunciNama(n.pelanggan) === kunciNama(nama));
+  let terakhir = "";
+  L.forEach(n => { if(!terakhir || n.tgl > terakhir) terakhir = n.tgl; });
+  return {
+    trx: L.length,
+    belanja: L.reduce((s,n)=>s+n.total,0),
+    piutang: L.reduce((s,n)=>s+sisaTagihan(n),0),
+    terakhir
+  };
+}
+function isiDatalistPelanggan(){
+  document.getElementById("daftarPelanggan").innerHTML =
+    db.pelanggan.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
+      .map(p=>`<option value="${esc(p.nama)}">`).join("");
+}
+/* nama baru yang diketik di kasir otomatis masuk daftar */
+function pastikanPelanggan(nama){
+  const n = String(nama||"").trim();
+  if(!n || kunciNama(n)==="umum" || cariPelanggan(n)) return;
+  db.pelanggan.push({id:uid(), nama:n, hp:"", kota:"", alamat:"", catatan:""});
+}
+
+document.getElementById("formPelanggan").addEventListener("submit", e=>{
+  e.preventDefault();
+  const id = document.getElementById("pgId").value;
+  const data = {
+    nama: document.getElementById("pgNama").value.trim(),
+    hp: document.getElementById("pgHp").value.trim(),
+    kota: document.getElementById("pgKota").value.trim(),
+    alamat: document.getElementById("pgAlamat").value.trim(),
+    catatan: document.getElementById("pgCatatan").value.trim()
+  };
+  if(!data.nama){ pesan("Nama pelanggan wajib diisi"); return; }
+  const kembar = cariPelanggan(data.nama);
+  if(kembar && kembar.id !== id){ pesan("Nama itu sudah ada di daftar"); return; }
+  if(id){
+    const p = db.pelanggan.find(x=>x.id===id);
+    if(p){
+      const namaLama = p.nama;
+      Object.assign(p, data);
+      /* nama berubah -> ikut perbarui nota lama agar riwayatnya tidak putus */
+      if(kunciNama(namaLama) !== kunciNama(data.nama)){
+        db.nota.forEach(n => { if(kunciNama(n.pelanggan)===kunciNama(namaLama)) n.pelanggan = data.nama; });
+      }
+      const ub = [beda("Nama", namaLama, data.nama), beda("HP", p.hp, data.hp),
+                  beda("Kota", p.kota, data.kota), beda("Alamat", p.alamat, data.alamat),
+                  beda("Catatan", p.catatan, data.catatan)].filter(Boolean);
+      if(ub.length) catat("pelanggan", `Ubah pelanggan "${data.nama}"`, ub.join(" · "));
+    }
+  }else{
+    db.pelanggan.push(Object.assign({id:uid()}, data));
+    catat("pelanggan", `Tambah pelanggan "${data.nama}"`, data.hp ? "HP "+data.hp : "");
+  }
+  if(simpan()){ resetFormPelanggan(); gambarPelanggan(); isiDatalistPelanggan(); pesan("✅ Pelanggan tersimpan"); }
+});
+
+function resetFormPelanggan(){
+  document.getElementById("formPelanggan").reset();
+  document.getElementById("pgId").value = "";
+}
+document.getElementById("btnBatalPelanggan").addEventListener("click", resetFormPelanggan);
+
+let filterPel = "semua";
+document.querySelectorAll("[data-fp]").forEach(b=> b.addEventListener("click", ()=>{
+  filterPel = b.dataset.fp;
+  document.querySelectorAll("[data-fp]").forEach(x=>x.classList.toggle("on", x===b));
+  gambarPelanggan();
+}));
+document.getElementById("cariPelanggan").addEventListener("input", gambarPelanggan);
+
+function gambarPelanggan(){
+  const q = document.getElementById("cariPelanggan").value.trim().toLowerCase();
+  let L = db.pelanggan.map(p => Object.assign({}, p, statPelanggan(p.nama)));
+  if(q) L = L.filter(p => p.nama.toLowerCase().includes(q) || (p.hp||"").toLowerCase().includes(q));
+  if(filterPel === "piutang") L = L.filter(p => p.piutang > 0);
+  if(filterPel === "sering")  L.sort((a,b)=> b.trx-a.trx || b.belanja-a.belanja);
+  else                        L.sort((a,b)=> a.nama.localeCompare(b.nama));
+
+  document.getElementById("pgCount").textContent = db.pelanggan.length ? `(${db.pelanggan.length})` : "";
+  document.getElementById("listPelanggan").innerHTML = L.length ? L.map(p=>`
+    <div class="item">
+      <div class="main">
+        <div class="nm">${esc(p.nama)} ${p.piutang>0 ? '<span class="tag warn">PIUTANG</span>' : ''}</div>
+        <div class="meta">
+          ${p.hp ? esc(p.hp)+" · " : ""}${p.kota ? esc(p.kota)+" · " : ""}${p.trx} transaksi${p.terakhir ? " · terakhir "+tglPendek(p.terakhir) : ""}
+          ${p.catatan ? "<br>"+esc(p.catatan) : ""}
+        </div>
+      </div>
+      <div class="side">
+        <span class="amt">${rp(p.belanja)}</span>
+        ${p.piutang>0 ? `<span class="amt neg" style="font-size:12px">sisa ${rp(p.piutang)}</span>` : ""}
+        <span>
+          ${p.hp ? `<button class="mini" data-chat="${p.id}">💬</button>` : ""}
+          <button class="mini" data-ubah-pg="${p.id}">✏️</button>
+          <button class="mini danger" data-hapus-pg="${p.id}">Hapus</button>
+        </span>
+      </div>
+    </div>`).join("")
+    : `<div class="kosong">${db.pelanggan.length ? "Tidak ada yang cocok." : "Belum ada pelanggan. Tambahkan di atas, atau nama yang Anda ketik di Kasir akan tersimpan otomatis."}</div>`;
+
+  document.querySelectorAll("[data-chat]").forEach(b=> b.onclick = ()=>{
+    const p = db.pelanggan.find(x=>x.id===b.dataset.chat); if(!p) return;
+    const no = normalHp(p.hp);
+    if(!no){ pesan("Nomor HP belum diisi"); return; }
+    window.open("https://wa.me/"+no, "_blank");
+  });
+  document.querySelectorAll("[data-ubah-pg]").forEach(b=> b.onclick = ()=>{
+    const p = db.pelanggan.find(x=>x.id===b.dataset.ubahPg); if(!p) return;
+    document.getElementById("pgId").value = p.id;
+    document.getElementById("pgNama").value = p.nama;
+    document.getElementById("pgHp").value = p.hp||"";
+    document.getElementById("pgKota").value = p.kota||"";
+    document.getElementById("pgAlamat").value = p.alamat||"";
+    document.getElementById("pgCatatan").value = p.catatan||"";
+    window.scrollTo({top:0, behavior:"smooth"});
+    pesan("Mengubah: "+p.nama);
+  });
+  document.querySelectorAll("[data-hapus-pg]").forEach(b=> b.onclick = ()=>{
+    const p = db.pelanggan.find(x=>x.id===b.dataset.hapusPg); if(!p) return;
+    const s = statPelanggan(p.nama);
+    const ingat = s.trx ? `\n\n${s.trx} nota atas nama ini TETAP tersimpan dan tidak ikut terhapus.` : "";
+    if(!confirm(`Hapus "${p.nama}" dari daftar pelanggan?${ingat}`)) return;
+    catat("pelanggan", `Hapus pelanggan "${p.nama}"`, `${s.trx} nota tetap tersimpan`);
+    db.pelanggan = db.pelanggan.filter(x=>x.id!==b.dataset.hapusPg);
+    simpan(); gambarPelanggan(); isiDatalistPelanggan(); pesan("Pelanggan dihapus");
+  });
+}
+
+function teksPelanggan(){
+  const L = db.pelanggan.map(p => Object.assign({}, p, statPelanggan(p.nama)))
+                        .sort((a,b)=> b.belanja - a.belanja);
+  const B = [], t = s => B.push(s);
+  t("👥 *DAFTAR PELANGGAN*");
+  t("");
+  t(db.profil.nama || "[Nama Bisnis]");
+  t("");
+  t("———————————————");
+  if(!L.length){ t(""); t("   Belum ada pelanggan."); return B.join("\n"); }
+  L.forEach((p,i)=>{
+    t("");
+    t(`${i+1}. *${p.nama}*`);
+    if(p.hp)     t(`   📲 ${p.hp}`);
+    if(p.alamat || p.kota) t(`   📍 ${[p.alamat, p.kota].filter(Boolean).join(", ")}`);
+    t(`   🛒 ${p.trx} transaksi — ${rp(p.belanja)}`);
+    if(p.piutang > 0) t(`   ⚠️ Sisa piutang: ${rp(p.piutang)}`);
+    if(p.terakhir)    t(`   🗓️ Terakhir belanja: ${tglPendek(p.terakhir)}`);
+  });
+  t("");
+  t("———————————————");
+  t("");
+  t(`Total pelanggan: *${L.length}*`);
+  t(`Total nilai belanja: *${rp(L.reduce((s,p)=>s+p.belanja,0))}*`);
+  const sisa = L.reduce((s,p)=>s+p.piutang,0);
+  if(sisa > 0) t(`Total piutang belum lunas: *${rp(sisa)}*`);
+  return B.join("\n");
+}
+document.getElementById("btnBuatPelanggan").addEventListener("click", ()=>{
+  if(!db.pelanggan.length){ pesan("Daftar pelanggan masih kosong"); return; }
+  document.getElementById("hasilPelanggan").textContent = teksPelanggan();
+  document.getElementById("boxPelanggan").classList.remove("hide");
+  pesan("✅ Daftar dibuat");
+});
+document.getElementById("btnSalinPelanggan").addEventListener("click", ()=> salin(document.getElementById("hasilPelanggan").textContent));
+document.getElementById("btnWaDaftarPelanggan").addEventListener("click", ()=> kirimWa(document.getElementById("hasilPelanggan").textContent));
+
+/* ==========================================================
+   KASIR
+   ========================================================== */
+let keranjang = [];
+let filterKat = "semua";
+
+document.querySelectorAll("[data-fk]").forEach(b=> b.addEventListener("click", ()=>{
+  filterKat = b.dataset.fk;
+  document.querySelectorAll("[data-fk]").forEach(x=>x.classList.toggle("on", x===b));
+  gambarPilihItem();
+}));
+document.getElementById("cariItem").addEventListener("input", gambarPilihItem);
+
+function gambarPilihItem(){
+  const q = document.getElementById("cariItem").value.trim().toLowerCase();
+  let L = db.katalog.slice();
+  if(filterKat!=="semua") L = L.filter(x=>x.jenis===filterKat);
+  if(q) L = L.filter(x=>x.nama.toLowerCase().includes(q));
+  document.getElementById("pilihItem").innerHTML = L.length ? L.map(it=>`
+    <div class="item">
+      <div class="main">
+        <div class="nm">${it.jenis==="barang"?"📦":"🛠️"} ${esc(it.nama)}</div>
+        <div class="meta">${rp(it.harga)} / ${esc(it.satuan)}</div>
+      </div>
+      <div class="side"><button class="mini primary" data-tambah="${it.id}">+ Tambah</button></div>
+    </div>`).join("")
+    : `<div class="kosong">${db.katalog.length ? "Tidak ada yang cocok." : "Katalog masih kosong — isi dulu di tab 🛍️ Katalog."}</div>`;
+
+  document.querySelectorAll("[data-tambah]").forEach(b=> b.onclick = ()=>{
+    const it = db.katalog.find(x=>x.id===b.dataset.tambah); if(!it) return;
+    const ada = keranjang.find(x=>x.refId===it.id);
+    if(ada) ada.qty++;
+    else keranjang.push({refId:it.id, nama:it.nama, jenis:it.jenis, satuan:it.satuan, harga:it.harga, qty:1});
+    gambarKeranjang(); pesan("➕ "+it.nama);
+  });
+}
+
+function gambarKeranjang(){
+  const el = document.getElementById("listKeranjang");
+  document.getElementById("krjCount").textContent = keranjang.length ? `(${keranjang.length} item)` : "";
+  el.innerHTML = keranjang.length ? keranjang.map((b,i)=>`
+    <div class="krj">
+      <div class="main">
+        <div class="nm">${b.jenis==="barang"?"📦":"🛠️"} ${esc(b.nama)}</div>
+        <div class="meta">@ ${rp(b.harga)} / ${esc(b.satuan)}</div>
+      </div>
+      <div class="qty">
+        <button data-q="${i}|-">−</button><span>${angka(b.qty)}</span><button data-q="${i}|+">+</button>
+      </div>
+      <div class="amt">${rp(barisTotal(b))}</div>
+    </div>`).join("")
+    : `<div class="kosong">Belum ada item. Pilih dari daftar di atas.</div>`;
+
+  document.querySelectorAll("[data-q]").forEach(b=> b.onclick = ()=>{
+    const [i,op] = b.dataset.q.split("|");
+    const it = keranjang[+i]; if(!it) return;
+    if(op==="+") it.qty++;
+    else { it.qty--; if(it.qty<=0) keranjang.splice(+i,1); }
+    gambarKeranjang();
+  });
+  hitungTampilNota();
+}
+
+function bacaDiskon(){
+  return { tipe: document.getElementById("dTipe").value, nilai: nilaiUang(document.getElementById("dNilai")) };
+}
+function hitungTampilNota(){
+  const d = bacaDiskon();
+  const h = hitungNotaObj(keranjang, d.tipe, d.nilai);
+  document.getElementById("sBarang").textContent = rp(h.sBarang);
+  document.getElementById("sJasa").textContent   = rp(h.sJasa);
+  document.getElementById("sSub").textContent    = rp(h.sub);
+  document.getElementById("sDiskon").textContent = h.diskon ? "− "+rp(h.diskon) : rp(0);
+  document.getElementById("sTotal").textContent  = rp(h.total);
+
+  const st = document.getElementById("nStatus").value;
+  const dp = st==="dp" ? Math.min(nilaiUang(document.getElementById("nDp")), h.total)
+           : st==="kredit" ? 0 : h.total;
+  const sisa = st==="tunai" ? 0 : Math.max(h.total - dp, 0);
+  document.getElementById("sDp").textContent   = rp(dp);
+  document.getElementById("sSisa").textContent = rp(sisa);
+  document.getElementById("rowDp").classList.toggle("hide", st!=="dp");
+  document.getElementById("rowSisa").classList.toggle("hide", st==="tunai");
+  return {h, dp, sisa, st};
+}
+["dNilai","dTipe","nDp"].forEach(id=> document.getElementById(id).addEventListener("input", hitungTampilNota));
+document.getElementById("dTipe").addEventListener("change", hitungTampilNota);
+
+const nStatus = document.getElementById("nStatus");
+nStatus.addEventListener("change", ()=>{
+  document.getElementById("nDpBox").classList.toggle("hide", nStatus.value!=="dp");
+  document.getElementById("nTempoBox").classList.toggle("hide", nStatus.value==="tunai");
+  hitungTampilNota();
+});
+
+document.getElementById("btnKosongkan").addEventListener("click", ()=>{
+  if(!keranjang.length) return;
+  if(!confirm("Kosongkan isi nota?")) return;
+  keranjang = []; document.getElementById("dNilai").value = ""; gambarKeranjang();
+});
+
+function nomorNota(tgl){
+  const pad = tgl.replace(/-/g,"");
+  const n = db.nota.filter(x=>x.tgl===tgl).length + 1;
+  return `NT-${pad}-${String(n).padStart(3,"0")}`;
+}
+
+document.getElementById("btnSimpanNota").addEventListener("click", ()=>{
+  if(!keranjang.length){ pesan("Isi nota masih kosong"); return; }
+  const tgl = document.getElementById("nTgl").value || hariIni();
+  const st = nStatus.value;
+  const pelanggan = document.getElementById("nPelanggan").value.trim();
+  if(st!=="tunai" && !pelanggan){ pesan("Isi nama pelanggan — sisanya akan jadi piutang"); return; }
+
+  const d = bacaDiskon();
+  const h = hitungNotaObj(keranjang, d.tipe, d.nilai);
+  let dp = 0;
+  if(st==="dp"){
+    dp = nilaiUang(document.getElementById("nDp"));
+    if(dp <= 0){ pesan("Isi jumlah uang mukanya"); return; }
+    if(dp >= h.total){ pesan("Uang muka ≥ total. Pilih status LUNAS saja."); return; }
+  }
+  const nota = {
+    id: uid(), no: nomorNota(tgl), tgl,
+    pelanggan: pelanggan || "Umum",
+    items: keranjang.map(x=>({nama:x.nama, jenis:x.jenis, satuan:x.satuan, harga:x.harga, qty:x.qty})),
+    diskonTipe: d.tipe, diskonNilai: d.nilai,
+    sBarang:h.sBarang, sJasa:h.sJasa, sub:h.sub, diskon:h.diskon, total:h.total,
+    dp,
+    metode: document.getElementById("nMetode").value,
+    bayar: st,
+    tempo: st==="tunai" ? "" : document.getElementById("nTempo").value,
+    bayaran: []
+  };
+  db.nota.unshift(nota);
+  const labelBayar = st==="tunai" ? "LUNAS" : st==="dp" ? `DP ${rp(dp)}, sisa ${rp(h.total-dp)}` : "BON";
+  catat("nota", `Buat nota ${nota.no} — ${nota.pelanggan}`,
+        `${nota.items.length} item · Total ${rp(h.total)}${h.diskon?` · Diskon ${rp(h.diskon)}`:""} · ${labelBayar}`);
+  pastikanPelanggan(nota.pelanggan);
+  if(!simpan()) return;
+
+  tampilkanNota(nota);
+  keranjang = [];
+  document.getElementById("dNilai").value = "";
+  document.getElementById("nDp").value = "";
+  document.getElementById("nPelanggan").value = "";
+  gambarKeranjang(); gambarRiwayatNota(); isiDatalistPelanggan();
+  pesan("✅ Nota "+nota.no+" tersimpan");
+  document.getElementById("boxNota").scrollIntoView({behavior:"smooth", block:"start"});
+});
+
+function teksNota(n){
+  const p = db.profil, B = [];
+  const t = s => B.push(s);
+  const garis = ()=>{ t(""); t("———————————————"); t(""); };
+
+  t("🧾 *NOTA PENJUALAN*");
+  t("");
+  if(p.nama)   t(`*${p.nama}*`);
+  if(p.alamat) t(p.alamat);
+  if(p.wa)     t(`📲 ${p.wa}`);
+  t("");
+  t(`No. Nota: ${n.no}`);
+  t("");
+  t(`👤 Pelanggan: *${n.pelanggan}*`);
+  t(`🗓️ Tanggal: *${tglPanjang(n.tgl)}*`);
+  garis();
+
+  const brg = n.items.filter(x=>x.jenis==="barang");
+  const jsa = n.items.filter(x=>x.jenis==="jasa");
+
+  if(brg.length){
+    t("*📦 PEMBELIAN BARANG*");
+    t("");
+    brg.forEach((b,i)=>{
+      t(`${i+1}. ${b.nama}`);
+      t(`   ${angka(b.qty)} x @ ${rp(b.harga)}`);
+      t(`   ➡️ ${rp(barisTotal(b))}`);
+      t("");
+    });
+    t(`🔸 Subtotal Barang: *${rp(n.sBarang)}*`);
+    garis();
+  }
+  if(jsa.length){
+    t("*🛠️ PENGGUNAAN JASA*");
+    t("");
+    jsa.forEach((b,i)=>{
+      t(`${i+1}. ${b.nama}`);
+      t(`   ${angka(b.qty)} x @ ${rp(b.harga)}`);
+      t(`   ➡️ ${rp(barisTotal(b))}`);
+      t("");
+    });
+    t(`🔸 Subtotal Jasa: *${rp(n.sJasa)}*`);
+    garis();
+  }
+
+  t("*💵 RINGKASAN PEMBAYARAN*");
+  t("");
+  if(brg.length){ t("• Subtotal Barang");  t(`  ${rp(n.sBarang)}`); t(""); }
+  if(jsa.length){ t("• Subtotal Jasa");    t(`  ${rp(n.sJasa)}`);   t(""); }
+  t("• *Subtotal*");
+  t(`  *${rp(n.sub)}*`);
+  t("");
+  if(n.diskon > 0){
+    t(`• Diskon${n.diskonTipe==="persen" ? ` (${angka(n.diskonNilai)}%)` : ""}`);
+    t(`  − ${rp(n.diskon)}`);
+    t("");
+  }
+  t("• *GRAND TOTAL*");
+  t(`  ➡️ *${rp(n.total)}*`);
+  t("");
+
+  const dp = dpNota(n), sisa = sisaTagihan(n);
+  const cic = (n.bayaran||[]).slice().sort((a,b)=>(a.tgl||"").localeCompare(b.tgl||""));
+  if(n.bayar !== "tunai" && dp > 0){
+    t("• Uang Muka (DP) dibayar");
+    t(`  ✅ ${tglPendek(n.tgl)} — ${rp(dp)}`);
+    t("");
+  }
+  if(cic.length){
+    t("• Pembayaran berikutnya");
+    cic.forEach(b=> t(`  ✅ ${tglPendek(b.tgl)} — ${rp(b.jml)}`));
+    t("");
+    t(`• Total sudah dibayar: *${rp(terbayar(n))}* dari ${rp(n.total)}`);
+    t("");
+  }
+  if(sisa > 0){
+    t("• *SISA YANG HARUS DIBAYAR*");
+    t(`  ➡️ *${rp(sisa)}*`);
+    t("");
+  }
+  garis();
+
+  if(n.bayar==="tunai"){
+    t(`💳 Metode Bayar: ${n.metode}`);
+    t("✅ Status: *LUNAS*");
+  }else if(sudahLunas(n)){
+    const akhir = (n.bayaran||[]).slice().sort((a,b)=>(a.tgl||"").localeCompare(b.tgl||"")).pop();
+    t(`💳 Metode Bayar: ${n.metode}`);
+    t(`✅ Status: *LUNAS*${akhir ? ` (dilunasi ${tglPendek(akhir.tgl)})` : ""}`);
+  }else if(terbayar(n) > 0){
+    t(`💳 Metode Bayar: ${n.metode}`);
+    t(`🕒 Status: *BARU DIBAYAR SEBAGIAN — SISA ${rp(sisa)}*`);
+    t(`🗓️ Jatuh tempo pelunasan: ${n.tempo ? tglPanjang(n.tempo) : "-"}`);
+  }else{
+    t("🕒 Status: *BELUM LUNAS / BON*");
+    t(`🗓️ Jatuh tempo: ${n.tempo ? tglPanjang(n.tempo) : "-"}`);
+  }
+  t("");
+  t("🙏 Terima kasih atas kepercayaan Anda.");
+  t("Simpan nota ini sebagai bukti pembayaran.");
+  return B.join("\n");
+}
+
+/* menampilkan nota + menyiapkan tombol kirim ke nomor pelanggannya */
+let notaAktif = null;
+function tampilkanNota(n){
+  notaAktif = n;
+  document.getElementById("hasilNota").textContent = teksNota(n);
+  document.getElementById("boxNota").classList.remove("hide");
+  const p = cariPelanggan(n.pelanggan);
+  const btn = document.getElementById("btnWaPelanggan");
+  if(p && normalHp(p.hp)){
+    btn.textContent = "💬 Kirim ke " + p.nama;
+    btn.classList.remove("hide");
+  }else{
+    btn.classList.add("hide");
+  }
+}
+document.getElementById("btnSalinNota").addEventListener("click", ()=> salin(document.getElementById("hasilNota").textContent));
+document.getElementById("btnWaNota").addEventListener("click", ()=> kirimWa(document.getElementById("hasilNota").textContent));
+document.getElementById("btnWaPelanggan").addEventListener("click", ()=>{
+  const p = notaAktif ? cariPelanggan(notaAktif.pelanggan) : null;
+  const no = p ? normalHp(p.hp) : "";
+  if(!no){ pesan("Nomor HP pelanggan belum diisi"); return; }
+  window.open(`https://wa.me/${no}?text=` + encodeURIComponent(document.getElementById("hasilNota").textContent), "_blank");
+});
+document.getElementById("btnCetakNota").addEventListener("click", ()=>{
+  document.getElementById("cetakArea").textContent = document.getElementById("hasilNota").textContent;
+  window.print();
+});
+
+function gambarRiwayatNota(){
+  const L = db.nota.slice().sort((a,b)=>(b.tgl||"").localeCompare(a.tgl||""));
+  document.getElementById("notaCount").textContent = L.length ? `(${L.length})` : "";
+  document.getElementById("listNota").innerHTML = L.length ? L.slice(0,40).map(n=>`
+    <div class="item">
+      <div class="main">
+        <div class="nm">${esc(n.no)} · ${esc(n.pelanggan)}</div>
+        <div class="meta">${tglPendek(n.tgl)} · ${n.items.length} item ·
+          ${ n.bayar==="tunai" || sudahLunas(n) ? '<span class="tag ok">LUNAS</span>'
+            : terbayar(n) > 0 ? `<span class="tag warn">SISA ${rp(sisaTagihan(n))}</span>`
+            : '<span class="tag warn">BON</span>' }
+        </div>
+      </div>
+      <div class="side">
+        <span class="amt">${rp(n.total)}</span>
+        <span>
+          <button class="mini" data-lihat="${n.id}">Lihat</button>
+          <button class="mini danger" data-hapus-nota="${n.id}">Hapus</button>
+        </span>
+      </div>
+    </div>`).join("") : `<div class="kosong">Belum ada nota.</div>`;
+
+  document.querySelectorAll("[data-lihat]").forEach(b=> b.onclick = ()=>{
+    const n = db.nota.find(x=>x.id===b.dataset.lihat); if(!n) return;
+    tampilkanNota(n);
+    document.getElementById("boxNota").scrollIntoView({behavior:"smooth", block:"start"});
+  });
+  document.querySelectorAll("[data-hapus-nota]").forEach(b=> b.onclick = ()=>{
+    const n = db.nota.find(x=>x.id===b.dataset.hapusNota);
+    if(!n || !confirm(`Hapus nota ${n.no}?`)) return;
+    catat("nota", `Hapus nota ${n.no} — ${n.pelanggan}`,
+          `Total ${rp(n.total)} · sudah dibayar ${rp(terbayar(n))}`);
+    db.nota = db.nota.filter(x=>x.id!==b.dataset.hapusNota);
+    simpan(); gambarRiwayatNota(); pesan("Nota dihapus");
+  });
+}
+
+/* ==========================================================
+   KAS
+   ========================================================== */
+const kBayar = document.getElementById("kBayar");
+kBayar.addEventListener("change", ()=> document.getElementById("kKreditBox").classList.toggle("hide", kBayar.value!=="kredit"));
+
+document.getElementById("formKeluar").addEventListener("submit", e=>{
+  e.preventDefault();
+  const bayar = kBayar.value;
+  const k = {
+    id: uid(),
+    tgl: document.getElementById("kTgl").value,
+    kategori: document.getElementById("kKategori").value,
+    ket: document.getElementById("kKet").value.trim(),
+    nominal: nilaiUang(document.getElementById("kNominal")),
+    bayar,
+    pihak: bayar==="kredit" ? document.getElementById("kSupplier").value.trim() : "",
+    tempo: bayar==="kredit" ? document.getElementById("kTempo").value : "",
+    bayaran: []
+  };
+  if(!k.ket || !k.nominal){ pesan("Lengkapi keterangan dan nominal"); return; }
+  if(bayar==="kredit" && !k.pihak){ pesan("Isi nama supplier"); return; }
+  db.keluar.unshift(k);
+  catat("kas", `Pengeluaran ${rp(k.nominal)} — ${k.ket}`,
+        `${k.kategori} · ${tglPendek(k.tgl)} · ${bayar==="kredit" ? "hutang ke "+k.pihak : "tunai"}`);
+  simpan();
+  e.target.reset();
+  document.getElementById("kTgl").value = hariIni();
+  document.getElementById("kKreditBox").classList.add("hide");
+  gambarKas(); pesan("✅ Pengeluaran tersimpan");
+});
+
+document.getElementById("formMasuk").addEventListener("submit", e=>{
+  e.preventDefault();
+  const m = {
+    id: uid(),
+    tgl: document.getElementById("mTgl").value,
+    nominal: nilaiUang(document.getElementById("mNominal")),
+    ket: document.getElementById("mKet").value.trim()
+  };
+  if(!m.ket || !m.nominal){ pesan("Lengkapi keterangan dan nominal"); return; }
+  db.masuk.unshift(m);
+  catat("kas", `Pemasukan lain ${rp(m.nominal)} — ${m.ket}`, tglPendek(m.tgl));
+  simpan();
+  e.target.reset();
+  document.getElementById("mTgl").value = hariIni();
+  gambarKas(); pesan("✅ Pemasukan tersimpan");
+});
+
+function gambarKas(){
+  const B = daftarPembayaran();
+  document.getElementById("listBayaran").innerHTML = B.length ? B.slice(0,40).map(p=>`
+    <div class="item">
+      <div class="main">
+        <div class="nm">${p.arah==="masuk" ? "⬆️" : "⬇️"} ${esc(p.nama||"-")}</div>
+        <div class="meta">${tglPendek(p.tgl)} · ${esc(p.ket)}</div>
+      </div>
+      <div class="side">
+        <span class="amt ${p.arah==="masuk"?"pos":"neg"}">${rp(p.jml)}</span>
+        <button class="mini danger" data-hb="${p.src}|${p.indukId}|${p.bayarId}">Hapus</button>
+      </div>
+    </div>`).join("") : `<div class="kosong">Belum ada pembayaran piutang / hutang.</div>`;
+
+  document.querySelectorAll("[data-hb]").forEach(b=> b.onclick = ()=>{
+    const [src,indukId,bayarId] = b.dataset.hb.split("|"); hapusBayaran(src,indukId,bayarId);
+  });
+
+  const K = db.keluar.slice().sort((a,b)=>(b.tgl||"").localeCompare(a.tgl||""));
+  document.getElementById("listKeluar").innerHTML = K.length ? K.slice(0,40).map(k=>`
+    <div class="item">
+      <div class="main">
+        <div class="nm">${esc(k.ket)}</div>
+        <div class="meta">${tglPendek(k.tgl)} · ${esc(k.kategori)} ·
+          ${ k.bayar==="tunai" ? '<span class="tag ok">TUNAI</span>'
+            : sudahLunas(k) ? '<span class="tag ok">LUNAS</span>'
+            : terbayar(k) > 0 ? `<span class="tag warn">HUTANG ${esc(k.pihak)} — sisa ${rp(sisaTagihan(k))}</span>`
+            : '<span class="tag warn">HUTANG — '+esc(k.pihak)+'</span>' }
+        </div>
+      </div>
+      <div class="side"><span class="amt neg">${rp(k.nominal)}</span>
+        <button class="mini danger" data-hk="${k.id}">Hapus</button></div>
+    </div>`).join("") : `<div class="kosong">Belum ada pengeluaran.</div>`;
+
+  const M = db.masuk.slice().sort((a,b)=>(b.tgl||"").localeCompare(a.tgl||""));
+  document.getElementById("listMasuk").innerHTML = M.length ? M.slice(0,20).map(m=>`
+    <div class="item">
+      <div class="main"><div class="nm">${esc(m.ket)}</div><div class="meta">${tglPendek(m.tgl)}</div></div>
+      <div class="side"><span class="amt pos">${rp(m.nominal)}</span>
+        <button class="mini danger" data-hm="${m.id}">Hapus</button></div>
+    </div>`).join("") : `<div class="kosong">Belum ada pemasukan lain.</div>`;
+
+  document.querySelectorAll("[data-hk]").forEach(b=> b.onclick = ()=>{
+    if(!confirm("Hapus pengeluaran ini?")) return;
+    const k = db.keluar.find(x=>x.id===b.dataset.hk);
+    if(k) catat("kas", `Hapus pengeluaran ${rp(k.nominal)} — ${k.ket}`, `${k.kategori} · ${tglPendek(k.tgl)}`);
+    db.keluar = db.keluar.filter(x=>x.id!==b.dataset.hk); simpan(); gambarKas(); pesan("Dihapus");
+  });
+  document.querySelectorAll("[data-hm]").forEach(b=> b.onclick = ()=>{
+    if(!confirm("Hapus pemasukan ini?")) return;
+    const m = db.masuk.find(x=>x.id===b.dataset.hm);
+    if(m) catat("kas", `Hapus pemasukan lain ${rp(m.nominal)} — ${m.ket}`, tglPendek(m.tgl));
+    db.masuk = db.masuk.filter(x=>x.id!==b.dataset.hm); simpan(); gambarKas(); pesan("Dihapus");
+  });
+}
+
+/* ==========================================================
+   UTANG PIUTANG
+   ========================================================== */
+document.getElementById("formHP").addEventListener("submit", e=>{
+  e.preventDefault();
+  const h = {
+    id: uid(),
+    jenis: document.getElementById("hJenis").value,
+    nama: document.getElementById("hNama").value.trim(),
+    nominal: nilaiUang(document.getElementById("hNominal")),
+    tempo: document.getElementById("hTempo").value,
+    ket: document.getElementById("hKet").value.trim(),
+    bayaran: []
+  };
+  if(!h.nama || !h.nominal){ pesan("Lengkapi nama dan nominal"); return; }
+  db.hpManual.unshift(h);
+  catat("kas", `Tambah ${h.jenis} manual ${rp(h.nominal)} — ${h.nama}`,
+        h.tempo ? "Jatuh tempo "+tglPendek(h.tempo) : "Tanpa jatuh tempo");
+  simpan(); e.target.reset(); gambarUtang(); pesan("✅ Tersimpan");
+});
+
+/* ---------- catat pembayaran (cicilan atau lunas) ---------- */
+let targetBayar = null;
+const ambilTagihan = (src,id) =>
+  (src==="nota" ? db.nota : src==="keluar" ? db.keluar : db.hpManual).find(x=>x.id===id) || null;
+
+function bukaModalBayar(src, id){
+  const o = ambilTagihan(src,id); if(!o) return;
+  targetBayar = {src, id};
+  const hutang = src==="keluar" || (src==="manual" && o.jenis==="hutang");
+  const nama = src==="nota" ? o.pelanggan : (o.pihak || o.nama);
+  const nilai = nilaiTagihan(o), sudah = terbayar(o), sisa = sisaTagihan(o);
+  const persen = nilai ? Math.round(sudah/nilai*100) : 0;
+
+  document.getElementById("mbJudul").textContent = hutang ? "💸 Bayar Hutang ke Supplier" : "💵 Terima Pembayaran Pelanggan";
+  document.getElementById("mbInfo").innerHTML = `
+    <div class="stat"><span class="lbl">${hutang?"Supplier":"Pelanggan"}</span><span class="val">${esc(nama||"-")}</span></div>
+    <div class="stat"><span class="lbl">Nilai tagihan</span><span class="val">${rp(nilai)}</span></div>
+    <div class="stat"><span class="lbl">Sudah dibayar</span><span class="val pos">${rp(sudah)}</span></div>
+    <div class="stat total"><span class="lbl">Sisa</span><span class="val ${hutang?'neg':'pos'}">${rp(sisa)}</span></div>
+    <div class="bar2"><i style="width:${persen}%"></i></div>
+    <div class="note" style="margin-top:2px">${persen}% terbayar</div>`;
+  isiUang(document.getElementById("mbJml"), sisa);
+  document.getElementById("mbTgl").value = hariIni();
+  document.getElementById("modalBayar").classList.remove("hide");
+}
+function tutupModalBayar(){
+  document.getElementById("modalBayar").classList.add("hide");
+  targetBayar = null;
+}
+document.getElementById("mbBatal").addEventListener("click", tutupModalBayar);
+document.getElementById("modalBayar").addEventListener("click", e=>{
+  if(e.target.id === "modalBayar") tutupModalBayar();
+});
+document.getElementById("mbSemua").addEventListener("click", ()=>{
+  if(!targetBayar) return;
+  isiUang(document.getElementById("mbJml"), sisaTagihan(ambilTagihan(targetBayar.src, targetBayar.id)));
+});
+document.querySelectorAll("[data-bagi]").forEach(b=> b.addEventListener("click", ()=>{
+  if(!targetBayar) return;
+  const sisa = sisaTagihan(ambilTagihan(targetBayar.src, targetBayar.id));
+  isiUang(document.getElementById("mbJml"), Math.round(sisa / Number(b.dataset.bagi)));
+}));
+
+document.getElementById("mbSimpan").addEventListener("click", ()=>{
+  if(!targetBayar) return;
+  const o = ambilTagihan(targetBayar.src, targetBayar.id); if(!o) return;
+  const jml = nilaiUang(document.getElementById("mbJml"));
+  const tgl = document.getElementById("mbTgl").value;
+  const sisa = sisaTagihan(o);
+  if(!tgl){ pesan("Isi tanggal pembayaran"); return; }
+  if(jml <= 0){ pesan("Isi jumlah pembayaran"); return; }
+  if(jml > sisa){ pesan(`Melebihi sisa tagihan ${rp(sisa)}`); return; }
+  if(!Array.isArray(o.bayaran)) o.bayaran = [];
+  o.bayaran.push({id:uid(), tgl, jml});
+  const pihak = targetBayar.src==="nota" ? o.pelanggan : (o.pihak || o.nama);
+  const arahLabel = (targetBayar.src==="keluar" || (targetBayar.src==="manual" && o.jenis==="hutang"))
+                    ? "hutang ke" : "piutang dari";
+  catat("bayar", `Terima/bayar ${rp(jml)} — ${arahLabel} ${pihak}`,
+        `Tanggal ${tglPendek(tgl)} · sisa ${rp(sisaTagihan(o))} dari ${rp(nilaiTagihan(o))}`);
+  if(!simpan()) return;
+  const baru = sisaTagihan(o);
+  tutupModalBayar(); gambarUtang(); gambarKas();
+  pesan(baru > 0 ? `✅ ${rp(jml)} dicatat — sisa ${rp(baru)}` : "✅ Lunas — kas diperbarui");
+});
+
+function hapusBayaran(src, indukId, bayarId){
+  const o = ambilTagihan(src, indukId); if(!o) return;
+  const b = (o.bayaran||[]).find(x=>x.id===bayarId); if(!b) return;
+  if(!confirm(`Hapus pembayaran ${rp(b.jml)} tanggal ${tglPendek(b.tgl)}?\n\nTagihan akan kembali bertambah sebesar itu.`)) return;
+  o.bayaran = o.bayaran.filter(x=>x.id!==bayarId);
+  catat("bayar", `Hapus pembayaran ${rp(b.jml)}`,
+        `Tanggal ${tglPendek(b.tgl)} · sisa kembali jadi ${rp(sisaTagihan(o))}`);
+  simpan(); gambarUtang(); gambarKas(); pesan("Pembayaran dihapus");
+}
+
+function barisUtang(x, jenis){
+  const telat = x.tempo && x.tempo < hariIni();
+  const persen = x.nilai ? Math.round(x.sudah/x.nilai*100) : 0;
+  const riwayat = x.bayaran.length ? `
+    <div class="cicil">
+      ${x.sudah>0 ? `Terbayar <b>${rp(x.sudah)}</b> dari ${rp(x.nilai)} (${persen}%)<div class="bar2" style="max-width:180px"><i style="width:${persen}%"></i></div>` : ""}
+      ${x.bayaran.map(b=>`• ${tglPendek(b.tgl)} — <b>${rp(b.jml)}</b>
+         <button class="mini danger" style="padding:1px 6px;font-size:10px" data-hapus-bayar="${x.src}|${x.id}|${b.id}">×</button>`).join("<br>")}
+    </div>` : (x.sudah>0 ? `<div class="cicil">Uang muka <b>${rp(x.sudah)}</b> dari ${rp(x.nilai)} (${persen}%)</div>` : "");
+
+  return `<div class="item">
+    <div class="main">
+      <div class="nm">${esc(x.nama)}</div>
+      <div class="meta">${x.ket ? esc(x.ket)+" · " : ""}${
+        x.tempo ? `Tempo ${tglPendek(x.tempo)} ${telat?'<span class="tag bad">LEWAT</span>':''}` : "Tanpa jatuh tempo"}</div>
+      ${riwayat}
+    </div>
+    <div class="side">
+      <span class="amt ${jenis==='piutang'?'pos':'neg'}">${rp(x.nominal)}</span>
+      <button class="mini primary" data-bayar="${x.src}|${x.id}">💵 Catat Bayar</button>
+    </div>
+  </div>`;
+}
+function gambarUtang(){
+  const P = daftarPiutang(), H = daftarHutang();
+  document.getElementById("totPiutang").textContent = rp(P.reduce((s,x)=>s+x.nominal,0));
+  document.getElementById("totHutang").textContent  = rp(H.reduce((s,x)=>s+x.nominal,0));
+  document.getElementById("listPiutang").innerHTML = P.length ? P.map(x=>barisUtang(x,"piutang")).join("") : `<div class="kosong">Tidak ada piutang 👍</div>`;
+  document.getElementById("listHutang").innerHTML  = H.length ? H.map(x=>barisUtang(x,"hutang")).join("")  : `<div class="kosong">Tidak ada hutang 👍</div>`;
+  document.querySelectorAll("[data-bayar]").forEach(b=> b.onclick = ()=>{
+    const [src,id] = b.dataset.bayar.split("|"); bukaModalBayar(src,id);
+  });
+  document.querySelectorAll("[data-hapus-bayar]").forEach(b=> b.onclick = ()=>{
+    const [src,indukId,bayarId] = b.dataset.hapusBayar.split("|"); hapusBayaran(src,indukId,bayarId);
+  });
+}
+
+/* ==========================================================
+   LAPORAN
+   ========================================================== */
+function preset(n){
+  const d = new Date(), y = d.getFullYear(), m = d.getMonth();
+  if(n==="hari-ini")  return [hariIni(), hariIni()];
+  if(n==="bulan-ini") return [isoDari(new Date(y,m,1)), isoDari(new Date(y,m+1,0))];
+  if(n==="bulan-lalu")return [isoDari(new Date(y,m-1,1)), isoDari(new Date(y,m,0))];
+  if(n==="tahun-ini") return [isoDari(new Date(y,0,1)), isoDari(new Date(y,11,31))];
+  return [isoDari(new Date(y,m,1)), isoDari(new Date(y,m+1,0))];
+}
+document.querySelectorAll("[data-lp]").forEach(b=> b.addEventListener("click", ()=>{
+  const [a,z] = preset(b.dataset.lp);
+  document.getElementById("lDari").value = a;
+  document.getElementById("lSampai").value = z;
+  document.querySelectorAll("[data-lp]").forEach(x=>x.classList.toggle("on", x===b));
+  gambarLaporan();
+}));
+["lDari","lSampai"].forEach(id=> document.getElementById(id).addEventListener("change", gambarLaporan));
+
+function gambarLaporan(){
+  const dari = document.getElementById("lDari").value || "0000-01-01";
+  const sampai = document.getElementById("lSampai").value || "9999-12-31";
+  const r = hitung(dari, sampai);
+
+  document.getElementById("rSaldo").textContent  = rp(r.saldoAkhir);
+  document.getElementById("rSaldo2").textContent = rp(r.saldoAkhir);
+  const net = r.totalMasuk - r.totalKeluar;
+  const eN = document.getElementById("rNet");
+  eN.textContent = (net>=0?"▲ Surplus ":"▼ Defisit ") + rp(Math.abs(net)) + " periode ini";
+  eN.className = "kecil " + (net>=0?"pos":"neg");
+
+  document.getElementById("rTrx").textContent  = r.trx + " transaksi";
+  document.getElementById("rPend").textContent = rp(r.pendapatan);
+  document.getElementById("rRata").textContent = rp(r.rata);
+  document.getElementById("rTerlaris").innerHTML = r.terlaris.length
+    ? r.terlaris.slice(0,3).map((p,i)=>`<div class="item"><div class="main">
+        <div class="nm">${i+1}. ${p.jenis==="barang"?"📦":"🛠️"} ${esc(p.nama)}</div>
+        <div class="meta">${angka(p.qty)} ${esc(p.satuan)}</div></div>
+        <div class="side"><span class="amt">${rp(p.nilai)}</span></div></div>`).join("")
+    : `<div class="kosong">Belum ada penjualan pada periode ini.</div>`;
+
+  document.getElementById("rAwal").textContent   = rp(r.saldoAwal);
+  document.getElementById("rMasuk").textContent  = rp(r.totalMasuk);
+  document.getElementById("rKeluar").textContent = rp(r.totalKeluar);
+  document.getElementById("rBesar").innerHTML = r.keluarBesar.length
+    ? r.keluarBesar.slice(0,3).map((x,i)=>`<div class="item"><div class="main">
+        <div class="nm">${i+1}. ${esc(x.ket)}</div>
+        <div class="meta">${esc(x.kategori||"Lain-lain")} · ${tglPendek(x.tgl)}</div></div>
+        <div class="side"><span class="amt neg">${rp(x.jml)}</span></div></div>`).join("")
+    : `<div class="kosong">Belum ada pengeluaran pada periode ini.</div>`;
+
+  document.getElementById("rPiutang").textContent = rp(r.totalPiutang);
+  document.getElementById("rHutang").textContent  = rp(r.totalHutang);
+  const sel = r.totalPiutang - r.totalHutang;
+  const eS = document.getElementById("rSelisih");
+  eS.textContent = rp(sel); eS.className = "val " + (sel>=0?"pos":"neg");
+
+  const lewat = r.piutang.concat(r.hutang).filter(x=>x.tempo && x.tempo < hariIni()).length;
+  document.getElementById("rTempo").textContent = lewat
+    ? `⚠️ ${lewat} tagihan sudah lewat jatuh tempo — cek tab 📝 Utang.`
+    : "✅ Tidak ada tagihan yang lewat jatuh tempo.";
+
+  document.getElementById("hdrNama").textContent = db.profil.nama || "Nota Toko";
+  document.getElementById("hdrSub").textContent  = `Periode ${tglPendek(dari)} – ${tglPendek(sampai)}`;
+}
+
+function teksLaporan(dari, sampai){
+  const r = hitung(dari, sampai);
+  const B = [], t = s => B.push(s);
+  const pisah = ()=>{ t(""); t("———————————————"); t(""); };
+
+  t("📄 *LAPORAN KEUANGAN SINGKAT*");
+  t("");
+  t(`🏢 Nama Bisnis: *${db.profil.nama || "[Nama Bisnis]"}*`);
+  t(`🗓️ Periode: *${tglPanjang(dari)} – ${tglPanjang(sampai)}*`);
+  pisah();
+
+  t("*📊 1. LAPORAN PENJUALAN*");
+  t("");
+  t("• Total Transaksi Berhasil");
+  t(`  ➡️ ${r.trx} transaksi`);
+  t("");
+  t("• Total Pendapatan Penjualan");
+  t(`  ➡️ ${rp(r.pendapatan)}`);
+  t("");
+  t("• Rata-rata per Transaksi");
+  t(`  ➡️ ${rp(r.rata)}`);
+  t("");
+  t("🏆 Produk / Jasa Terlaris:");
+  t("");
+  if(r.terlaris.length){
+    r.terlaris.slice(0,3).forEach((p,i)=>{
+      t(`${i+1}. ${p.nama} — ${angka(p.qty)} ${p.satuan}`);
+      t(`   ${rp(p.nilai)}`);
+    });
+  }else t("   Belum ada penjualan pada periode ini.");
+  pisah();
+
+  t("*💰 2. LAPORAN KAS (ARUS KAS)*");
+  t("");
+  t("• Saldo Awal Kas");
+  t(`  ➡️ ${rp(r.saldoAwal)}`);
+  t("");
+  t("• Total Pemasukan");
+  t(`  ➡️ ${rp(r.totalMasuk)} ⬆️`);
+  t("");
+  t("• Total Pengeluaran");
+  t(`  ➡️ ${rp(r.totalKeluar)} ⬇️`);
+  t("");
+  t("• *SALDO AKHIR KAS*");
+  t(`  ➡️ *${rp(r.saldoAkhir)}* ${r.saldoAkhir >= 0 ? "✅" : "⚠️ kas minus"}`);
+  t("");
+  t(`_(${rp(r.saldoAwal)} + ${rp(r.totalMasuk)} − ${rp(r.totalKeluar)})_`);
+  t("");
+  if(r.keluarBesar.length){
+    t("🧾 Rincian Pengeluaran Terbesar:");
+    t("");
+    r.keluarBesar.slice(0,3).forEach((x,i)=>{
+      t(`${i+1}. ${x.ket} — ${rp(x.jml)}`);
+      t(`   ${x.kategori||"Lain-lain"} · ${tglPendek(x.tgl)}`);
+    });
+    t("");
+  }
+  const net = r.totalMasuk - r.totalKeluar;
+  t(`📈 Arus kas bersih: *${net>=0?"+":"−"}${rp(Math.abs(net))}* (${net>=0?"surplus":"defisit"})`);
+  pisah();
+
+  t("*📝 3. LAPORAN HUTANG & PIUTANG*");
+  t("");
+  t("🟢 *PIUTANG* (uang kita di pelanggan)");
+  t("");
+  if(r.piutang.length){
+    r.piutang.forEach((x,i)=>{
+      t(`${i+1}. ${x.nama} — ${rp(x.nominal)}`);
+      t(`   Jatuh tempo: ${x.tempo?tglPendek(x.tempo):"-"}${x.tempo && x.tempo<hariIni()?" ⚠️ lewat tempo":""}`);
+    });
+  }else t("   Tidak ada piutang. 👍");
+  t("");
+  t(`➡️ *TOTAL PIUTANG: ${rp(r.totalPiutang)}*`);
+  t("");
+  t("🔴 *HUTANG* (kewajiban ke supplier)");
+  t("");
+  if(r.hutang.length){
+    r.hutang.forEach((x,i)=>{
+      t(`${i+1}. ${x.nama} — ${rp(x.nominal)}`);
+      t(`   Jatuh tempo: ${x.tempo?tglPendek(x.tempo):"-"}${x.tempo && x.tempo<hariIni()?" ⚠️ lewat tempo":""}`);
+    });
+  }else t("   Tidak ada hutang. 👍");
+  t("");
+  t(`➡️ *TOTAL HUTANG: ${rp(r.totalHutang)}*`);
+  t("");
+  const sel = r.totalPiutang - r.totalHutang;
+  t(`⚖️ Selisih posisi: *${sel>=0?"+":"−"}${rp(Math.abs(sel))}*`);
+  t(sel>=0 ? "_(piutang lebih besar dari hutang)_"
+    : `_(hutang lebih besar dari piutang${r.saldoAkhir>=r.totalHutang?", namun masih tertutup saldo kas":"; perhatikan ketersediaan kas"})_`);
+  pisah();
+
+  t("*📬 PENUTUP*");
+  t("");
+  t(`Demikian Laporan Keuangan Singkat periode ${tglPanjang(dari)} – ${tglPanjang(sampai)} ini disusun berdasarkan data transaksi yang tercatat. Seluruh angka telah direkap dan siap untuk direview lebih lanjut. Apabila terdapat koreksi, penyesuaian, atau data tambahan, mohon dapat disampaikan agar laporan segera diperbarui.`);
+  t("");
+  t("Terima kasih. 🙏");
+  if(db.profil.penyusun){ t(""); t(`Disusun oleh: ${db.profil.penyusun}`); }
+  t(`Dibuat: ${tglPanjang(hariIni())}`);
+  return B.join("\n");
+}
+
+document.getElementById("btnBuatLaporan").addEventListener("click", ()=>{
+  const dari = document.getElementById("lDari").value, sampai = document.getElementById("lSampai").value;
+  if(!dari || !sampai){ pesan("Pilih periode dulu"); return; }
+  if(dari > sampai){ pesan("Tanggal 'Dari' melebihi 'Sampai'"); return; }
+  document.getElementById("hasilLaporan").textContent = teksLaporan(dari, sampai);
+  document.getElementById("boxLaporan").classList.remove("hide");
+  pesan("✅ Laporan dibuat");
+  document.getElementById("boxLaporan").scrollIntoView({behavior:"smooth", block:"start"});
+});
+document.getElementById("btnSalinLaporan").addEventListener("click", ()=> salin(document.getElementById("hasilLaporan").textContent));
+document.getElementById("btnWaLaporan").addEventListener("click", ()=> kirimWa(document.getElementById("hasilLaporan").textContent));
+
+/* ==========================================================
+   PENGATURAN
+   ========================================================== */
+function isiProfil(){
+  const p = db.profil;
+  document.getElementById("sNama").value = p.nama||"";
+  document.getElementById("sAlamat").value = p.alamat||"";
+  document.getElementById("sWa").value = p.wa||"";
+  document.getElementById("sJam").value = p.jam||"";
+  document.getElementById("sPenyusun").value = p.penyusun||"";
+  isiUang(document.getElementById("sSaldo"), p.saldoAwal||0);
+  document.getElementById("sMulai").value = p.tglMulai||"";
+}
+document.getElementById("btnSimpanProfil").addEventListener("click", ()=>{
+  const p = db.profil;
+  const awal = Object.assign({}, p);
+  p.nama = document.getElementById("sNama").value.trim();
+  p.alamat = document.getElementById("sAlamat").value.trim();
+  p.wa = document.getElementById("sWa").value.trim();
+  p.jam = document.getElementById("sJam").value.trim();
+  p.penyusun = document.getElementById("sPenyusun").value.trim();
+  const ub = [beda("Nama bisnis", awal.nama, p.nama), beda("Alamat", awal.alamat, p.alamat),
+              beda("WhatsApp", awal.wa, p.wa), beda("Jam", awal.jam, p.jam),
+              beda("Penyusun", awal.penyusun, p.penyusun)].filter(Boolean);
+  if(ub.length) catat("atur", "Ubah profil bisnis", ub.join(" · "));
+  simpan(); gambarLaporan(); pesan("✅ Profil disimpan");
+});
+document.getElementById("btnSimpanKas").addEventListener("click", ()=>{
+  const saldoLama = db.profil.saldoAwal, mulaiLama = db.profil.tglMulai;
+  db.profil.saldoAwal = nilaiUang(document.getElementById("sSaldo"));
+  db.profil.tglMulai = document.getElementById("sMulai").value;
+  const ub = [beda("Saldo awal", saldoLama, db.profil.saldoAwal, rp),
+              beda("Tanggal mulai", mulaiLama, db.profil.tglMulai, tglPendek)].filter(Boolean);
+  if(ub.length) catat("atur", "Ubah kas awal", ub.join(" · "));
+  simpan(); gambarLaporan(); pesan("✅ Kas awal disimpan");
+});
+
+/* ---------------- kunci log ---------------- */
+/* Sandi tidak disimpan apa adanya — yang disimpan hasil pengacakan SHA-256
+   beserta garamnya. Ini mencegah sandi terbaca langsung dari data,
+   tetapi bukan pengaman terhadap orang yang menguasai perangkat. */
+function garamBaru(){
+  const a = new Uint8Array(16);
+  (crypto && crypto.getRandomValues) ? crypto.getRandomValues(a) : a.forEach((_,i)=>a[i]=i*7+3);
+  return [...a].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+async function acakSandi(sandi, garam){
+  const data = new TextEncoder().encode(garam + "|" + sandi);
+  if(crypto && crypto.subtle && crypto.subtle.digest){
+    const buf = await crypto.subtle.digest("SHA-256", data);
+    return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+  }
+  let h = 5381;                                   // cadangan bila SHA-256 tak tersedia
+  data.forEach(c => { h = ((h * 33) ^ c) >>> 0; });
+  return "cadangan:" + h.toString(16);
+}
+function segarkanKartuKunci(){
+  const ada = !!(db.kunci && db.kunci.hash);
+  document.getElementById("kunciBelumAda").classList.toggle("hide", ada);
+  document.getElementById("kunciSudahAda").classList.toggle("hide", !ada);
+}
+
+document.getElementById("btnBuatSandi").addEventListener("click", async ()=>{
+  const a = document.getElementById("sdBaru").value;
+  const b = document.getElementById("sdUlang").value;
+  if(a.length < 4){ pesan("Sandi minimal 4 karakter"); return; }
+  if(a !== b){ pesan("Ulangan sandi tidak sama"); return; }
+  const garam = garamBaru();
+  db.kunci = { hash: await acakSandi(a, garam), garam };
+  catat("atur", "Sandi log dibuat", "");
+  simpan();
+  document.getElementById("sdBaru").value = "";
+  document.getElementById("sdUlang").value = "";
+  segarkanKartuKunci();
+  pesan("✅ Sandi tersimpan");
+});
+
+document.getElementById("btnGantiSandi").addEventListener("click", async ()=>{
+  const lama = document.getElementById("sdMasuk").value;
+  if(!lama){ pesan("Isi sandi lama dulu di kolom Sandi"); return; }
+  if(await acakSandi(lama, db.kunci.garam) !== db.kunci.hash){ pesan("❌ Sandi lama salah"); return; }
+  const baru = prompt("Sandi baru (minimal 4 karakter):");
+  if(baru === null) return;
+  if(baru.length < 4){ pesan("Sandi minimal 4 karakter"); return; }
+  const garam = garamBaru();
+  db.kunci = { hash: await acakSandi(baru, garam), garam };
+  catat("atur", "Sandi log diganti", "");
+  simpan();
+  document.getElementById("sdMasuk").value = "";
+  pesan("✅ Sandi diganti");
+});
+
+document.getElementById("btnBukaLog").addEventListener("click", async ()=>{
+  const s = document.getElementById("sdMasuk").value;
+  if(!s){ pesan("Masukkan sandi"); return; }
+  if(await acakSandi(s, db.kunci.garam) !== db.kunci.hash){ pesan("❌ Sandi salah"); return; }
+  document.getElementById("sdMasuk").value = "";
+  gambarLog();
+  document.getElementById("modalLog").classList.remove("hide");
+});
+
+/* ---------------- penampil log ---------------- */
+let filterLog = "semua";
+document.querySelectorAll("[data-fl]").forEach(b=> b.addEventListener("click", ()=>{
+  filterLog = b.dataset.fl;
+  document.querySelectorAll("[data-fl]").forEach(x=>x.classList.toggle("on", x===b));
+  gambarLog();
+}));
+document.getElementById("cariLog").addEventListener("input", gambarLog);
+document.getElementById("btnTutupLog").addEventListener("click", ()=>{
+  document.getElementById("modalLog").classList.add("hide");
+});
+document.getElementById("modalLog").addEventListener("click", e=>{
+  if(e.target.id === "modalLog") document.getElementById("modalLog").classList.add("hide");
+});
+
+const IKON_LOG = {katalog:"🛍️", nota:"🧾", bayar:"💵", kas:"💸", pelanggan:"👥", atur:"⚙️", data:"💾"};
+
+function logTersaring(){
+  const q = document.getElementById("cariLog").value.trim().toLowerCase();
+  let L = (db.log||[]).slice();
+  if(filterLog !== "semua") L = L.filter(x=>x.jenis === filterLog);
+  if(q) L = L.filter(x => (x.judul+" "+x.rincian).toLowerCase().includes(q));
+  return L;
+}
+function gambarLog(){
+  const L = logTersaring();
+  document.getElementById("logCount").textContent =
+    `(${L.length}${L.length !== (db.log||[]).length ? " dari "+(db.log||[]).length : ""})`;
+  document.getElementById("listLog").innerHTML = L.length ? L.slice(0,300).map(x=>`
+    <div class="item">
+      <div class="main">
+        <div class="nm">${IKON_LOG[x.jenis]||"•"} ${esc(x.judul)}</div>
+        <div class="meta">${waktuPendek(x.waktu)}${x.rincian ? "<br>"+esc(x.rincian) : ""}</div>
+      </div>
+    </div>`).join("")
+    : `<div class="kosong">${(db.log||[]).length ? "Tidak ada yang cocok." : "Belum ada aktivitas tercatat."}</div>`;
+}
+document.getElementById("btnSalinLog").addEventListener("click", ()=>{
+  const L = logTersaring();
+  if(!L.length){ pesan("Tidak ada yang bisa disalin"); return; }
+  const teks = ["🔒 LOG AKTIVITAS", db.profil.nama || "", `Dicetak: ${waktuPendek(new Date().toISOString())}`, ""]
+    .concat(L.map(x => `${waktuPendek(x.waktu)}\n${x.judul}${x.rincian ? "\n   "+x.rincian : ""}`))
+    .join("\n");
+  salin(teks);
+});
+
+document.getElementById("btnExport").addEventListener("click", ()=>{
+  const blob = new Blob([JSON.stringify(db)], {type:"application/json"});
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `cadangan-nota-toko-${hariIni()}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  setTimeout(()=>URL.revokeObjectURL(a.href), 4000);
+  pesan("⬇️ Cadangan diunduh");
+});
+document.getElementById("btnImport").addEventListener("click", ()=> document.getElementById("fileImport").click());
+document.getElementById("fileImport").addEventListener("change", e=>{
+  const f = e.target.files[0]; if(!f) return;
+  const fr = new FileReader();
+  fr.onload = ()=>{
+    try{
+      const d = JSON.parse(fr.result);
+      if(!d || typeof d!=="object" || !Array.isArray(d.nota) || !Array.isArray(d.katalog)) throw 0;
+      if(!confirm("Pulihkan data dari file ini? Data saat ini akan diganti.")) return;
+      const logLama = (db.log||[]).slice();
+      const kunciLama = db.kunci;
+      db = Object.assign(kosong(), d);
+      /* log kedua sisi digabung agar jejak tidak hilang */
+      const sudah = new Set((db.log||[]).map(x=>x.id));
+      db.log = (db.log||[]).concat(logLama.filter(x=>!sudah.has(x.id)))
+                           .sort((a,b)=>String(b.waktu).localeCompare(String(a.waktu)));
+      if(!db.kunci || !db.kunci.hash) db.kunci = kunciLama;
+      catat("data", "Pulihkan data dari cadangan",
+            `${(d.nota||[]).length} nota · ${(d.katalog||[]).length} item katalog`);
+      simpan(); isiProfil(); segarkanKartuKunci(); keTab("kasir"); pesan("✅ Data dipulihkan");
+    }catch(err){ pesan("❌ File cadangan tidak valid"); }
+    e.target.value = "";
+  };
+  fr.readAsText(f);
+});
+
+document.getElementById("btnReset").addEventListener("click", ()=>{
+  if(!confirm("Hapus SEMUA data (katalog, nota, kas, utang)?")) return;
+  if(!confirm("Yakin? Sebaiknya unduh cadangan dulu.")) return;
+  const logLama = (db.log||[]).slice(), kunciLama = db.kunci;
+  const ringkas = `${db.nota.length} nota · ${db.katalog.length} item · ${db.pelanggan.length} pelanggan`;
+  db = kosong(); db.log = logLama; db.kunci = kunciLama;
+  catat("data", "HAPUS SEMUA DATA", ringkas + " dihapus. Log dan sandi dipertahankan.");
+  keranjang = []; simpan(); isiProfil(); segarkanKartuKunci(); keTab("kasir"); pesan("Semua data dihapus");
+});
+
+document.getElementById("btnDemo").addEventListener("click", ()=>{
+  if(!confirm("Muat data contoh? Data saat ini akan ditimpa.")) return;
+  const d = new Date(), y = d.getFullYear(), m = d.getMonth();
+  const T = h => isoDari(new Date(y, m, h));
+  const akhirBulan = new Date(y, m+1, 0).getDate();
+  const H = n => T(Math.min(n, akhirBulan));
+
+  const logSebelum = (db.log||[]).slice(), kunciSebelum = db.kunci;
+  db = kosong();
+  db.log = logSebelum; db.kunci = kunciSebelum;
+  db.profil = {
+    nama:"Toko Berkah Jaya", alamat:"Jl. Raya No. 12, Bekasi", wa:"0812-3456-7890",
+    jam:"Senin–Sabtu, 08.00–17.00", penyusun:"", saldoAwal:5000000, tglMulai:H(1)
+  };
+  db.katalog = [
+    {id:"k1", jenis:"barang", nama:"Oli Mesin",   harga:50000,  satuan:"botol", desc:"Menjaga mesin tetap dingin dan halus, tarikan jadi lebih enteng.", foto:""},
+    {id:"k2", jenis:"barang", nama:"Filter Oli",  harga:45000,  satuan:"pcs",   desc:"Menyaring kotoran sebelum masuk mesin, komponen dalam lebih awet.", foto:""},
+    {id:"k3", jenis:"barang", nama:"Aki Kering",  harga:320000, satuan:"unit",  desc:"Starter langsung nyala, bebas perawatan dan aman tanpa air aki.", foto:""},
+    {id:"k4", jenis:"jasa",   nama:"Servis Ringan", harga:100000, satuan:"kali", desc:"Tune-up cepat sekitar 45 menit, kendaraan kembali responsif dan irit.", foto:""},
+    {id:"k5", jenis:"jasa",   nama:"Servis Besar",  harga:450000, satuan:"kali", desc:"Pembongkaran dan pembersihan menyeluruh untuk mesin yang terasa berat.", foto:""},
+    {id:"k6", jenis:"jasa",   nama:"Cuci Kendaraan",harga:25000,  satuan:"kali", desc:"Bersih sampai sela-sela, tampilan kembali kinclong seperti baru.", foto:""}
+  ];
+  const I = (nama,jenis,satuan,harga,qty)=>({nama,jenis,satuan,harga,qty});
+  const urut = {};
+  const buat = (tgl, pelanggan, items, dTipe, dNilai, bayar, tempo, dp)=>{
+    const h = hitungNotaObj(items, dTipe, dNilai);
+    urut[tgl] = (urut[tgl]||0) + 1;
+    return {
+      id: uid(),
+      no: `NT-${tgl.replace(/-/g,"")}-${String(urut[tgl]).padStart(3,"0")}`,
+      tgl, pelanggan, items, diskonTipe:dTipe, diskonNilai:dNilai,
+      sBarang:h.sBarang, sJasa:h.sJasa, sub:h.sub, diskon:h.diskon, total:h.total,
+      dp: dp||0, metode:"Tunai", bayar, tempo:tempo||"", bayaran:[]
+    };
+  };
+  db.pelanggan = [
+    {id:uid(), nama:"Bpk. Budi",     hp:"0812-1111-2222", kota:"Bekasi", alamat:"Jl. Melati No. 8",   catatan:"Langganan servis rutin"},
+    {id:uid(), nama:"Ibu Sari",      hp:"0813-3333-4444", kota:"Bekasi", alamat:"Jl. Anggrek No. 21", catatan:""},
+    {id:uid(), nama:"Bengkel Jaya",  hp:"0815-5555-6666", kota:"Cikarang", alamat:"Ruko Blok C-5",   catatan:"Beli partai besar"},
+    {id:uid(), nama:"Bpk. Ahmad",    hp:"0857-7777-8888", kota:"Bekasi", alamat:"", catatan:""},
+    {id:uid(), nama:"CV Maju Motor", hp:"0821-9999-0000", kota:"Tambun", alamat:"Jl. Industri No. 3", catatan:"Pembayaran via transfer"}
+  ];
+  const OLI  = q => I("Oli Mesin","barang","botol",50000,q);
+  const FIL  = q => I("Filter Oli","barang","pcs",45000,q);
+  const AKI  = q => I("Aki Kering","barang","unit",320000,q);
+  const SR   = q => I("Servis Ringan","jasa","kali",100000,q);
+  const SB   = q => I("Servis Besar","jasa","kali",450000,q);
+  const CUCI = q => I("Cuci Kendaraan","jasa","kali",25000,q);
+  const TEMPO_A = H(28), TEMPO_B = H(akhirBulan);
+
+  db.nota = [
+    buat(H(3),  "Bpk. Budi",     [OLI(2), SR(1)],          "persen", 10,     "tunai"),
+    buat(H(4),  "Umum",          [CUCI(3)],                "rp", 0,          "tunai"),
+    buat(H(5),  "Ibu Sari",      [FIL(2), OLI(2)],         "rp", 0,          "tunai"),
+    buat(H(6),  "Bengkel Jaya",  [AKI(3), SB(1)],          "rp", 50000,      "tunai"),
+    buat(H(8),  "Umum",          [SR(2)],                  "rp", 0,          "tunai"),
+    buat(H(9),  "Bpk. Ahmad",    [OLI(6), FIL(3)],         "rp", 0,          "tunai"),
+    buat(H(10), "Umum",          [SB(2)],                  "rp", 0,          "tunai"),
+    buat(H(11), "Ibu Sari",      [AKI(2)],                 "rp", 0,          "tunai"),
+    buat(H(13), "Umum",          [OLI(10), CUCI(4)],       "rp", 0,          "tunai"),
+    buat(H(15), "Bpk. Budi",     [SR(3), OLI(4)],          "rp", 0,          "kredit", TEMPO_A),
+    buat(H(17), "Umum",          [SB(1), FIL(1)],          "rp", 0,          "tunai"),
+    buat(H(19), "CV Maju Motor", [AKI(5)],                 "rp", 100000,     "tunai"),
+    buat(H(21), "Umum",          [SR(4), CUCI(6)],         "rp", 0,          "tunai"),
+    buat(H(23), "Bpk. Ahmad",    [OLI(8), FIL(4), SR(2)],  "rp", 0,          "tunai"),
+    buat(H(25), "Bengkel Jaya",  [SB(3), AKI(4)],          "rp", 130000,     "dp", TEMPO_B, 1000000),
+    buat(H(27), "Ibu Sari",      [OLI(5), CUCI(2)],        "rp", 0,          "tunai"),
+    buat(H(29), "Umum",          [SR(5), FIL(2)],          "rp", 0,          "kredit", TEMPO_B)
+  ].reverse();
+
+  db.keluar = [
+    {id:uid(), tgl:H(2),  kategori:"Peralatan & Sparepart", ket:"Belanja sparepart",      nominal:5000000, bayar:"tunai",  pihak:"", tempo:"", bayaran:[]},
+    {id:uid(), tgl:H(10), kategori:"Gaji & Upah",           ket:"Gaji 2 mekanik",         nominal:2000000, bayar:"tunai",  pihak:"", tempo:"", bayaran:[]},
+    {id:uid(), tgl:H(15), kategori:"Listrik & Air",         ket:"Tagihan listrik & air",  nominal:1000000, bayar:"tunai",  pihak:"", tempo:"", bayaran:[]},
+    {id:uid(), tgl:H(21), kategori:"Belanja Barang / Stok", ket:"Stok oli 1 dus",         nominal:2000000, bayar:"kredit", pihak:"Toko Grosir Makmur", tempo:TEMPO_A, bayaran:[]}
+  ];
+  db.hpManual = [
+    {id:uid(), jenis:"hutang", nama:"CV Sumber Oli", nominal:1200000, tempo:TEMPO_B, ket:"Sisa tagihan bulan lalu",
+     bayaran:[{id:uid(), tgl:H(26), jml:400000}]}
+  ];
+  /* nota DP Bengkel Jaya dicicil sekali: 2.500.000 - DP 1.000.000 - cicilan 500.000 = sisa 1.000.000 */
+  const notaDp = db.nota.find(n => n.bayar === "dp");
+  if(notaDp) notaDp.bayaran = [{id:uid(), tgl:H(28), jml:500000}];
+  catat("data", "Muat data contoh", "Data sebelumnya ditimpa");
+  simpan(); isiProfil();
+  const [a,z] = preset("bulan-ini");
+  document.getElementById("lDari").value = a;
+  document.getElementById("lSampai").value = z;
+  keTab("laporan"); pesan("✅ Data contoh dimuat");
+});
+
+/* ==========================================================
+   PWA
+   ========================================================== */
+let promptPasang = null;
+window.addEventListener("beforeinstallprompt", e=>{
+  e.preventDefault(); promptPasang = e;
+  document.getElementById("btnInstall").classList.remove("hide");
+  document.getElementById("infoInstall").textContent = "Aplikasi siap dipasang ke layar HP Anda.";
+});
+document.getElementById("btnInstall").addEventListener("click", async ()=>{
+  if(!promptPasang) return;
+  promptPasang.prompt();
+  await promptPasang.userChoice;
+  promptPasang = null;
+  document.getElementById("btnInstall").classList.add("hide");
+});
+window.addEventListener("appinstalled", ()=>{
+  document.getElementById("infoInstall").textContent = "✅ Aplikasi sudah terpasang di perangkat ini.";
+  document.getElementById("btnInstall").classList.add("hide");
+});
+
+if("serviceWorker" in navigator && location.protocol.startsWith("http")){
+  window.addEventListener("load", ()=>{
+    navigator.serviceWorker.register("sw.js").catch(()=>{});
+  });
+}
+
+/* ==========================================================
+   MULAI
+   ========================================================== */
+(function mulai(){
+  muat();
+  migrasiPembayaran();
+  pasangUang();
+  const [a,z] = preset("bulan-ini");
+  document.getElementById("lDari").value = a;
+  document.getElementById("lSampai").value = z;
+  document.querySelector('[data-lp="bulan-ini"]').classList.add("on");
+  ["nTgl","kTgl","mTgl"].forEach(id=> document.getElementById(id).value = hariIni());
+  if(!db.profil.tglMulai) db.profil.tglMulai = a;
+
+  document.getElementById("infoPakai").textContent =
+    location.protocol === "file:"
+      ? "ℹ️ Dibuka langsung dari file. Agar bisa dipasang sebagai aplikasi di HP, buka lewat alamat http (lihat berkas CARA-PAKAI.txt)."
+      : "";
+
+  isiProfil();
+  segarkanKartuKunci();
+  isiDatalistPelanggan();
+  gambarPilihItem(); gambarKeranjang(); gambarRiwayatNota(); gambarLaporan();
+  document.getElementById("hdrNama").textContent = db.profil.nama || "Nota Toko";
+})();
+</script>
+</body>
+</html>
