@@ -132,6 +132,15 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(-4px)}
 .note{font-size:12.5px;color:var(--muted);margin-top:8px}
 
+/* gerbang masuk aplikasi */
+#gerbang{position:fixed;inset:0;z-index:200;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px}
+.gerbangIsi{width:100%;max-width:340px;text-align:center}
+.gerbangIkon{width:76px;height:76px;margin:0 auto 14px;border-radius:20px;background:var(--brand);color:var(--brand-ink);display:flex;align-items:center;justify-content:center;font-size:38px}
+.gerbangIsi h1{font-size:20px;margin:0 0 2px}
+.gerbangIsi .sub{font-size:13px;color:var(--muted);margin-bottom:20px}
+.gerbangIsi label{text-align:left}
+.gerbangIsi .note{text-align:left}
+
 /* layar catat pembayaran */
 .modal{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center}
 .modalIsi{background:var(--card);border-radius:var(--r) var(--r) 0 0;padding:18px 16px calc(18px + env(safe-area-inset-bottom));width:100%;max-width:620px;max-height:88vh;overflow:auto}
@@ -153,6 +162,40 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 </style>
 </head>
 <body>
+
+<!-- ============ gerbang masuk ============ -->
+<div id="gerbang">
+  <div class="gerbangIsi">
+    <div class="gerbangIkon">🧾</div>
+    <h1 id="gbNama">Nota Toko</h1>
+    <div class="sub">Masukkan sandi untuk melanjutkan</div>
+    <label for="gbSandi">Sandi</label>
+    <input type="password" id="gbSandi" autocomplete="current-password" placeholder="Sandi masuk">
+    <button class="primary block" id="gbMasuk">🔓 Masuk</button>
+    <div class="note" id="gbPesan"></div>
+    <div class="note" style="border-top:1px solid var(--line);padding-top:10px;margin-top:16px">
+      Lupa sandi? Sandi tidak bisa dipulihkan. Jalan keluarnya memulihkan dari berkas
+      cadangan, atau menghapus data situs ini lewat pengaturan browser — dan itu
+      menghapus seluruh data toko di perangkat ini.
+    </div>
+  </div>
+</div>
+<script>
+/* Dijalankan lebih dulu agar isi aplikasi tidak sempat terlihat sekejap
+   sebelum gerbang tampil - dan sebaliknya, gerbang tidak berkedip
+   bagi pengguna yang tidak memasang sandi. */
+(function(){
+  try{
+    const d = JSON.parse(localStorage.getItem("notaToko.v1") || "{}");
+    const perluSandi = !!(d && d.kunciMasuk && d.kunciMasuk.hash);
+    const sudahMasuk = sessionStorage.getItem("notaToko.terbuka") === "1";
+    if(!perluSandi || sudahMasuk) document.getElementById("gerbang").style.display = "none";
+  }catch(e){
+    document.getElementById("gerbang").style.display = "none";
+  }
+})();
+</script>
+
 <div class="wrap">
 
 <header>
@@ -527,6 +570,41 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
   </div>
 
   <div class="card">
+    <h2>🔐 Sandi Masuk Aplikasi</h2>
+    <div class="note" style="margin-top:0">
+      Diminta setiap kali aplikasi dibuka. Setelah masuk, tidak ditanya lagi
+      sampai aplikasi ditutup.
+    </div>
+
+    <div id="masukBelumAda">
+      <label for="mkBaru">Sandi masuk</label>
+      <input type="password" id="mkBaru" autocomplete="new-password" placeholder="Minimal 4 karakter">
+      <label for="mkUlang">Ulangi sandi</label>
+      <input type="password" id="mkUlang" autocomplete="new-password" placeholder="Ketik ulang">
+      <button class="primary block" id="btnPasangMasuk">Pasang Sandi Masuk</button>
+    </div>
+
+    <div id="masukSudahAda" class="hide">
+      <div class="stat"><span class="lbl">Status</span><span class="val pos">🔐 Aktif</span></div>
+      <label for="mkLama">Sandi saat ini</label>
+      <input type="password" id="mkLama" autocomplete="current-password" placeholder="Diperlukan untuk mengubah">
+      <div class="btnrow">
+        <button id="btnGantiMasuk">Ganti Sandi</button>
+        <button class="danger" id="btnMatikanMasuk">Matikan</button>
+      </div>
+      <button class="block" id="btnKunciSekarang">🔒 Kunci Sekarang</button>
+    </div>
+
+    <div class="note" style="border-top:1px solid var(--line);padding-top:10px;margin-top:14px">
+      ⚠️ <b>Batas kemampuannya.</b> Sandi disimpan teracak, bukan apa adanya.
+      Namun kode aplikasi ini terbuka dan datanya ada di dalam browser, sehingga
+      orang yang paham teknis tetap bisa menembusnya lewat alat pengembang.
+      Gunanya menahan orang yang memegang HP atau laptop Anda — bukan pengganti
+      kunci layar perangkat. Nyalakan juga PIN atau sidik jari di perangkat Anda.
+    </div>
+  </div>
+
+  <div class="card">
     <h2>🔒 Log Aktivitas</h2>
     <div class="note" style="margin-top:0">
       Mencatat setiap perubahan: harga, katalog, nota, pembayaran, kas, pelanggan, dan pengaturan.
@@ -648,7 +726,7 @@ const KEY = "notaToko.v1";
 const kosong = () => ({
   profil:{nama:"",alamat:"",wa:"",jam:"",penyusun:"",saldoAwal:0,tglMulai:""},
   katalog:[], pelanggan:[], nota:[], keluar:[], masuk:[], hpManual:[],
-  log:[], kunci:{hash:"", garam:""}
+  log:[], kunci:{hash:"", garam:""}, kunciMasuk:{hash:"", garam:""}
 });
 let db = kosong();
 
@@ -2071,6 +2149,92 @@ document.getElementById("btnSimpanKas").addEventListener("click", ()=>{
   simpan(); gambarLaporan(); pesan("✅ Kas awal disimpan");
 });
 
+/* ---------------- sandi masuk aplikasi ---------------- */
+const TANDA_MASUK = "notaToko.terbuka";
+
+function segarkanKartuMasuk(){
+  const ada = !!(db.kunciMasuk && db.kunciMasuk.hash);
+  document.getElementById("masukBelumAda").classList.toggle("hide", ada);
+  document.getElementById("masukSudahAda").classList.toggle("hide", !ada);
+}
+function bukaGerbang(){
+  try{ sessionStorage.setItem(TANDA_MASUK, "1"); }catch(e){}
+  document.getElementById("gerbang").style.display = "none";
+}
+function kunciSekarang(){
+  try{ sessionStorage.removeItem(TANDA_MASUK); }catch(e){}
+  document.getElementById("gbSandi").value = "";
+  document.getElementById("gbPesan").textContent = "";
+  document.getElementById("gbNama").textContent = db.profil.nama || "Nota Toko";
+  document.getElementById("gerbang").style.display = "flex";
+}
+
+async function cobaMasuk(){
+  const s = document.getElementById("gbSandi").value;
+  const pesanEl = document.getElementById("gbPesan");
+  if(!s){ pesanEl.textContent = "Masukkan sandi dulu."; return; }
+  if(await acakSandi(s, db.kunciMasuk.garam) !== db.kunciMasuk.hash){
+    pesanEl.textContent = "❌ Sandi salah. Coba lagi.";
+    document.getElementById("gbSandi").value = "";
+    document.getElementById("gbSandi").focus();
+    return;
+  }
+  document.getElementById("gbSandi").value = "";
+  pesanEl.textContent = "";
+  bukaGerbang();
+}
+document.getElementById("gbMasuk").addEventListener("click", cobaMasuk);
+document.getElementById("gbSandi").addEventListener("keydown", e=>{ if(e.key === "Enter") cobaMasuk(); });
+
+document.getElementById("btnPasangMasuk").addEventListener("click", async ()=>{
+  const a = document.getElementById("mkBaru").value;
+  const b = document.getElementById("mkUlang").value;
+  if(a.length < 4){ pesan("Sandi minimal 4 karakter"); return; }
+  if(a !== b){ pesan("Ulangan sandi tidak sama"); return; }
+  const garam = garamBaru();
+  db.kunciMasuk = { hash: await acakSandi(a, garam), garam };
+  catat("atur", "Sandi masuk aplikasi dipasang", "");
+  simpan();
+  document.getElementById("mkBaru").value = "";
+  document.getElementById("mkUlang").value = "";
+  try{ sessionStorage.setItem(TANDA_MASUK, "1"); }catch(e){}   // jangan langsung mengunci diri sendiri
+  segarkanKartuMasuk();
+  pesan("✅ Sandi masuk aktif");
+});
+
+document.getElementById("btnGantiMasuk").addEventListener("click", async ()=>{
+  const lama = document.getElementById("mkLama").value;
+  if(!lama){ pesan("Isi sandi saat ini dulu"); return; }
+  if(await acakSandi(lama, db.kunciMasuk.garam) !== db.kunciMasuk.hash){ pesan("❌ Sandi salah"); return; }
+  const baru = prompt("Sandi masuk yang baru (minimal 4 karakter):");
+  if(baru === null) return;
+  if(baru.length < 4){ pesan("Sandi minimal 4 karakter"); return; }
+  const garam = garamBaru();
+  db.kunciMasuk = { hash: await acakSandi(baru, garam), garam };
+  catat("atur", "Sandi masuk aplikasi diganti", "");
+  simpan();
+  document.getElementById("mkLama").value = "";
+  pesan("✅ Sandi masuk diganti");
+});
+
+document.getElementById("btnMatikanMasuk").addEventListener("click", async ()=>{
+  const lama = document.getElementById("mkLama").value;
+  if(!lama){ pesan("Isi sandi saat ini dulu"); return; }
+  if(await acakSandi(lama, db.kunciMasuk.garam) !== db.kunciMasuk.hash){ pesan("❌ Sandi salah"); return; }
+  if(!confirm("Matikan sandi masuk?\n\nAplikasi akan langsung terbuka tanpa ditanya sandi.")) return;
+  db.kunciMasuk = { hash:"", garam:"" };
+  catat("atur", "Sandi masuk aplikasi DIMATIKAN", "Aplikasi kini terbuka tanpa sandi");
+  simpan();
+  document.getElementById("mkLama").value = "";
+  segarkanKartuMasuk();
+  pesan("Sandi masuk dimatikan");
+});
+
+document.getElementById("btnKunciSekarang").addEventListener("click", ()=>{
+  document.getElementById("mkLama").value = "";
+  kunciSekarang();
+});
+
 /* ---------------- kunci log ---------------- */
 /* Sandi tidak disimpan apa adanya — yang disimpan hasil pengacakan SHA-256
    beserta garamnya. Ini mencegah sandi terbaca langsung dari data,
@@ -2200,16 +2364,17 @@ document.getElementById("fileImport").addEventListener("change", e=>{
       if(!d || typeof d!=="object" || !Array.isArray(d.nota) || !Array.isArray(d.katalog)) throw 0;
       if(!confirm("Pulihkan data dari file ini? Data saat ini akan diganti.")) return;
       const logLama = (db.log||[]).slice();
-      const kunciLama = db.kunci;
+      const kunciLama = db.kunci, masukLamaPulih = db.kunciMasuk;
       db = Object.assign(kosong(), d);
       /* log kedua sisi digabung agar jejak tidak hilang */
       const sudah = new Set((db.log||[]).map(x=>x.id));
       db.log = (db.log||[]).concat(logLama.filter(x=>!sudah.has(x.id)))
                            .sort((a,b)=>String(b.waktu).localeCompare(String(a.waktu)));
       if(!db.kunci || !db.kunci.hash) db.kunci = kunciLama;
+      db.kunciMasuk = masukLamaPulih;   /* sandi masuk perangkat ini yang dipakai, bukan dari berkas */
       catat("data", "Pulihkan data dari cadangan",
             `${(d.nota||[]).length} nota · ${(d.katalog||[]).length} item katalog`);
-      simpan(); isiProfil(); segarkanKartuKunci(); keTab("kasir"); pesan("✅ Data dipulihkan");
+      simpan(); isiProfil(); segarkanKartuKunci(); segarkanKartuMasuk(); keTab("kasir"); pesan("✅ Data dipulihkan");
     }catch(err){ pesan("❌ File cadangan tidak valid"); }
     e.target.value = "";
   };
@@ -2219,11 +2384,11 @@ document.getElementById("fileImport").addEventListener("change", e=>{
 document.getElementById("btnReset").addEventListener("click", ()=>{
   if(!confirm("Hapus SEMUA data (katalog, nota, kas, utang)?")) return;
   if(!confirm("Yakin? Sebaiknya unduh cadangan dulu.")) return;
-  const logLama = (db.log||[]).slice(), kunciLama = db.kunci;
+  const logLama = (db.log||[]).slice(), kunciLama = db.kunci, masukLama = db.kunciMasuk;
   const ringkas = `${db.nota.length} nota · ${db.katalog.length} item · ${db.pelanggan.length} pelanggan`;
-  db = kosong(); db.log = logLama; db.kunci = kunciLama;
+  db = kosong(); db.log = logLama; db.kunci = kunciLama; db.kunciMasuk = masukLama;
   catat("data", "HAPUS SEMUA DATA", ringkas + " dihapus. Log dan sandi dipertahankan.");
-  keranjang = []; simpan(); isiProfil(); segarkanKartuKunci(); keTab("kasir"); pesan("Semua data dihapus");
+  keranjang = []; simpan(); isiProfil(); segarkanKartuKunci(); segarkanKartuMasuk(); keTab("kasir"); pesan("Semua data dihapus");
 });
 
 document.getElementById("btnDemo").addEventListener("click", ()=>{
@@ -2233,9 +2398,9 @@ document.getElementById("btnDemo").addEventListener("click", ()=>{
   const akhirBulan = new Date(y, m+1, 0).getDate();
   const H = n => T(Math.min(n, akhirBulan));
 
-  const logSebelum = (db.log||[]).slice(), kunciSebelum = db.kunci;
+  const logSebelum = (db.log||[]).slice(), kunciSebelum = db.kunci, masukSebelum = db.kunciMasuk;
   db = kosong();
-  db.log = logSebelum; db.kunci = kunciSebelum;
+  db.log = logSebelum; db.kunci = kunciSebelum; db.kunciMasuk = masukSebelum;
   db.profil = {
     nama:"Toko Berkah Jaya", alamat:"Jl. Raya No. 12, Bekasi", wa:"0812-3456-7890",
     jam:"Senin–Sabtu, 08.00–17.00", penyusun:"", saldoAwal:5000000, tglMulai:H(1)
@@ -2365,6 +2530,13 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
 
   isiProfil();
   segarkanKartuKunci();
+  segarkanKartuMasuk();
+  document.getElementById("gbNama").textContent = db.profil.nama || "Nota Toko";
+  if(db.kunciMasuk && db.kunciMasuk.hash){
+    const terbuka = (()=>{ try{ return sessionStorage.getItem(TANDA_MASUK)==="1"; }catch(e){ return false; } })();
+    if(!terbuka){ document.getElementById("gerbang").style.display = "flex";
+                  setTimeout(()=>document.getElementById("gbSandi").focus(), 60); }
+  }
   isiDatalistPelanggan();
   gambarPilihItem(); gambarKeranjang(); gambarRiwayatNota(); gambarLaporan();
   document.getElementById("hdrNama").textContent = db.profil.nama || "Nota Toko";

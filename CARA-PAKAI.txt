@@ -142,7 +142,49 @@ Syarat: HP dan laptop tersambung ke WiFi yang sama.
 
 
 ========================================
- D. LOG AKTIVITAS (BERSANDI)
+ D. SANDI MASUK APLIKASI
+========================================
+Aplikasi bisa dikunci agar meminta sandi setiap kali dibuka.
+
+MEMASANG
+  Tab "Atur" -> kartu "Sandi Masuk Aplikasi" -> isi sandi dua
+  kali -> "Pasang Sandi Masuk". Minimal 4 karakter.
+
+CARA KERJANYA
+  Sandi diminta saat aplikasi dibuka. Setelah masuk, tidak
+  ditanya lagi selama aplikasi belum ditutup - jadi tidak
+  mengganggu saat dipakai berjualan seharian.
+
+  Ingin mengunci saat meninggalkan meja? Tab "Atur" ->
+  "Kunci Sekarang".
+
+MENGGANTI ATAU MEMATIKAN
+  Tab "Atur" -> isi sandi saat ini -> "Ganti Sandi" atau
+  "Matikan". Keduanya tercatat di log.
+
+LUPA SANDI
+  Sandi TIDAK bisa dipulihkan. Pilihannya:
+    - pulihkan data dari berkas cadangan di perangkat lain, atau
+    - hapus data situs ini lewat pengaturan browser - tetapi
+      seluruh data toko di perangkat itu ikut hilang.
+  Karena itu rutinlah mengunduh cadangan.
+
+SEBERAPA AMAN
+  Sandi disimpan teracak, bukan apa adanya. Tetapi kode aplikasi
+  ini terbuka dan datanya ada di dalam browser, sehingga orang
+  yang paham teknis tetap bisa menembusnya lewat alat pengembang.
+
+  Gunanya menahan orang yang kebetulan memegang HP atau laptop
+  Anda. Ini BUKAN pengganti kunci layar perangkat - nyalakan juga
+  PIN atau sidik jari di HP dan laptop Anda.
+
+  Orang asing yang membuka alamat aplikasi dari internet tidak
+  melihat data Anda sama sekali, sebab data tersimpan di browser
+  perangkat Anda, bukan di server.
+
+
+========================================
+ E. LOG AKTIVITAS (BERSANDI)
 ========================================
 Setiap perubahan dicatat otomatis, lengkap dengan nilai
 sebelum dan sesudahnya. Contoh baris log:
@@ -194,7 +236,7 @@ BELUM ADA: JUMLAH STOK
 
 
 ========================================
- E. PENTING - DATA ANDA
+ F. PENTING - DATA ANDA
 ========================================
 Data tersimpan di dalam browser perangkat yang dipakai, bukan
 di internet. Artinya:
