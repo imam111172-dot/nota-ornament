@@ -4,6 +4,8 @@ Aplikasi kasir dan pembukuan sederhana untuk toko kecil. Berjalan penuh di
 browser, tanpa server dan tanpa internet. Bisa dipasang ke layar HP sebagai
 aplikasi (PWA).
 
+**➡️ Buka aplikasinya: https://imam111172-dot.github.io/nota-ornament/**
+
 ## Fitur
 
 - **Kasir** — buat nota dari katalog, atur jumlah dan diskon, keluarkan teks
@@ -24,8 +26,8 @@ aplikasi (PWA).
 
 ## Cara pakai
 
-Buka alamat GitHub Pages repositori ini, lalu di Chrome HP pilih menu titik
-tiga → **Add to Home screen**. Di laptop, Chrome → **Install page as app**.
+Buka https://imam111172-dot.github.io/nota-ornament/ lalu di Chrome HP pilih
+menu titik tiga → **Add to Home screen**. Di laptop, Chrome → **Install page as app**.
 
 Bisa juga dijalankan tanpa internet: unduh isi repositori ini lalu klik dua kali
 `index.html`. Petunjuk lengkap ada di [CARA-PAKAI.txt](CARA-PAKAI.txt).
