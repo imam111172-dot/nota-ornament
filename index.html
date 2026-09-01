@@ -651,10 +651,11 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
       <button id="btnImport">⬆️ Pulihkan dari Berkas</button>
     </div>
     <input type="file" id="fileImport" accept="application/json,.json,text/plain,.txt" class="hide">
-    <div class="note">
-      Cara memindahkan: di perangkat lama tekan <b>Kirim Cadangan</b> lalu pilih WhatsApp
-      atau Drive. Di perangkat baru, simpan berkasnya, buka aplikasi ini, lalu tekan
-      <b>Pulihkan dari Berkas</b> dan pilih berkas itu.
+    <div class="note" id="infoKirim">
+      Di HP, tombol di atas langsung memunculkan pilihan WhatsApp atau Drive.
+      Di laptop, berkasnya diunduh lalu Anda kirim sendiri.
+      Di perangkat tujuan: simpan berkasnya, buka aplikasi ini, tekan
+      <b>Pulihkan dari Berkas</b>, lalu pilih berkas itu.
     </div>
     <div class="note" id="infoPakai"></div>
   </div>
@@ -2887,33 +2888,44 @@ document.getElementById("btnExport").addEventListener("click", ()=>{
   pesan("⬇️ Cadangan diunduh");
 });
 
+/* Berkas hanya bisa masuk WhatsApp lewat lembar berbagi bawaan sistem;
+   wa.me cuma sanggup mengirim teks. Sistem membatasi jenis berkas yang
+   boleh dibagikan, dan .txt paling luas diterima - maka dicoba lebih dulu. */
 document.getElementById("btnKirimCadangan").addEventListener("click", async ()=>{
   const isi = JSON.stringify(db);
   const ukuran = Math.round(new Blob([isi]).size / 1024);
-
-  /* Sebagian browser menolak membagikan berkas .json.
-     Kalau ditolak, dicoba lagi sebagai .txt yang isinya sama persis. */
   const percobaan = [
-    { nama: namaCadangan("json"), tipe: "application/json" },
-    { nama: namaCadangan("txt"),  tipe: "text/plain" }
+    { nama: namaCadangan("txt"),  tipe: "text/plain" },
+    { nama: namaCadangan("json"), tipe: "application/json" }
   ];
-  for(const c of percobaan){
-    const berkas = new File([isi], c.nama, { type: c.tipe });
-    if(navigator.canShare && navigator.canShare({ files: [berkas] })){
+
+  let adaYangDitawarkan = false;
+  if(navigator.share && navigator.canShare){
+    for(const c of percobaan){
+      const berkas = new File([isi], c.nama, { type: c.tipe });
+      if(!navigator.canShare({ files: [berkas] })) continue;
+      adaYangDitawarkan = true;
       try{
-        await navigator.share({ files: [berkas], title: "Cadangan " + (db.profil.nama || "Toko") });
-        catat("data", "Cadangan dikirim ke perangkat lain", `${ukuran} KB · ${db.nota.length} nota`);
+        await navigator.share({ files: [berkas] });
+        catat("data", "Cadangan dikirim ke perangkat lain", `${ukuran} KB · ${db.nota.length} nota · ${c.nama}`);
         simpan();
         pesan("✅ Cadangan terkirim");
         return;
       }catch(e){
-        if(e.name === "AbortError") return;      /* dibatalkan pengguna */
+        if(e.name === "AbortError") return;          /* dibatalkan pengguna */
+        /* jenis ini gagal - coba bentuk berikutnya */
       }
     }
   }
-  /* browser tidak mendukung berbagi berkas - diunduh saja */
+
+  /* tidak bisa mengirim berkas: diunduh, dan alasannya dijelaskan */
   unduhBerkas(new Blob([isi], {type:"application/json"}), namaCadangan("json"));
-  pesan("⬇️ Diunduh — kirim sendiri berkasnya dari folder Unduhan");
+  document.getElementById("infoKirim").innerHTML = adaYangDitawarkan
+    ? "⚠️ Pengiriman ditolak sistem, jadi berkasnya diunduh. Kirim sendiri dari folder Unduhan."
+    : "ℹ️ Browser ini tidak bisa mengirim berkas langsung, jadi berkasnya diunduh. " +
+      "Kirim sendiri dari folder Unduhan — atau buka aplikasi ini di HP, di sana tombolnya " +
+      "langsung memunculkan pilihan WhatsApp.";
+  pesan("⬇️ Berkas diunduh");
 });
 document.getElementById("btnImport").addEventListener("click", ()=> document.getElementById("fileImport").click());
 document.getElementById("fileImport").addEventListener("change", e=>{
