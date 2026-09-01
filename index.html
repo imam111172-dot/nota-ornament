@@ -644,6 +644,42 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
   </div>
 
   <div class="card">
+    <h2>☁️ Data Bersama (Google Sheets)</h2>
+    <div class="note" style="margin-top:0">
+      Simpan data di spreadsheet milik Anda supaya bisa dipakai dari beberapa perangkat.
+      Langkah pemasangannya ada di berkas <b>apps-script/BACA-DULU.txt</b>.
+    </div>
+
+    <label for="cUrl">Alamat Web App</label>
+    <input type="text" id="cUrl" autocomplete="off" placeholder="https://script.google.com/macros/s/.../exec">
+    <label for="cKunci">Kunci rahasia</label>
+    <input type="password" id="cKunci" autocomplete="off" placeholder="Kunci yang Anda pasang di Apps Script">
+    <label for="cPerangkat">Nama perangkat ini</label>
+    <input type="text" id="cPerangkat" autocomplete="off" placeholder="Contoh: HP Kasir">
+
+    <div class="btnrow">
+      <button class="primary" id="btnUjiCloud">🔌 Uji Sambungan</button>
+      <button id="btnSimpanCloud">💾 Simpan Pengaturan</button>
+    </div>
+
+    <div class="stat"><span class="lbl">Status</span><span class="val" id="cStatus">Belum diatur</span></div>
+
+    <div class="btnrow">
+      <button class="primary" id="btnKirimCloud">⬆️ Kirim ke Cloud</button>
+      <button id="btnAmbilCloud">⬇️ Ambil dari Cloud</button>
+    </div>
+    <div class="note" id="cInfo"></div>
+
+    <div class="note" style="border-top:1px solid var(--line);padding-top:10px;margin-top:14px">
+      ⚠️ <b>Cara kerjanya saat ini.</b> Pengiriman dan pengambilan masih manual, dan
+      memindahkan <i>seluruh</i> data — bukan menggabungkan per transaksi. Jadi biasakan
+      <b>Ambil dari Cloud</b> sebelum mulai bekerja, dan <b>Kirim ke Cloud</b> setelah selesai.
+      Kalau perangkat lain sudah mengirim lebih dulu, aplikasi menahan pengiriman Anda
+      dan memberi tahu — tidak menimpa diam-diam.
+    </div>
+  </div>
+
+  <div class="card">
     <h2>💾 Cadangkan Data</h2>
     <div class="note" style="margin-top:0">Data tersimpan di perangkat ini saja. Cadangkan secara berkala, dan pakai berkas yang sama untuk memindahkan data ke perangkat lain.</div>
     <button class="primary block" id="btnKirimCadangan" style="margin-top:10px">📤 Kirim Cadangan ke Perangkat Lain</button>
@@ -2716,6 +2752,150 @@ document.getElementById("btnSimpanKas").addEventListener("click", ()=>{
   simpan(); gambarLaporan(); pesan("✅ Kas awal disimpan");
 });
 
+/* ==========================================================
+   DATA BERSAMA LEWAT GOOGLE APPS SCRIPT
+   Pengaturannya sengaja disimpan terpisah dari data toko, supaya
+   kunci rahasia tidak ikut terbawa saat cadangan dikirim ke orang lain.
+   ========================================================== */
+const KUNCI_CLOUD = "notaToko.cloud";
+
+function bacaCloud(){
+  try{
+    const s = localStorage.getItem(KUNCI_CLOUD);
+    if(s) return Object.assign({url:"", kunci:"", perangkat:"", versi:0, waktu:""}, JSON.parse(s));
+  }catch(e){}
+  return {url:"", kunci:"", perangkat:"", versi:0, waktu:""};
+}
+function simpanCloud(c){
+  try{ localStorage.setItem(KUNCI_CLOUD, JSON.stringify(c)); }catch(e){}
+}
+function isiFormCloud(){
+  const c = bacaCloud();
+  document.getElementById("cUrl").value = c.url;
+  document.getElementById("cKunci").value = c.kunci;
+  document.getElementById("cPerangkat").value = c.perangkat;
+  segarkanStatusCloud();
+}
+function segarkanStatusCloud(){
+  const c = bacaCloud();
+  const el = document.getElementById("cStatus");
+  if(!c.url || !c.kunci){ el.textContent = "Belum diatur"; el.className = "val"; return; }
+  el.textContent = c.waktu ? "Tersambung - " + waktuPendek(c.waktu) : "Tersambung";
+  el.className = "val pos";
+}
+function catatanCloud(t){ document.getElementById("cInfo").innerHTML = t; }
+function bacaFormCloud(){
+  const c = bacaCloud();
+  c.url = document.getElementById("cUrl").value.trim();
+  c.kunci = document.getElementById("cKunci").value.trim();
+  c.perangkat = document.getElementById("cPerangkat").value.trim() || "Perangkat";
+  simpanCloud(c);
+  return c;
+}
+
+/* Content-Type text/plain dipakai supaya browser tidak mengirim permintaan
+   pendahuluan yang tidak dilayani Apps Script. */
+async function panggilCloud(aksi, muatan){
+  const c = bacaCloud();
+  if(!c.url) throw new Error("Alamat Web App belum diisi");
+  const res = await fetch(c.url, {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify(Object.assign({ kunci: c.kunci, aksi }, muatan || {}))
+  });
+  if(!res.ok) throw new Error("Server menjawab " + res.status);
+  const teks = await res.text();
+  try{ return JSON.parse(teks); }
+  catch(e){ throw new Error("Jawaban server tidak terbaca - periksa alamat Web App"); }
+}
+
+document.getElementById("btnSimpanCloud").addEventListener("click", ()=>{
+  const c = bacaFormCloud();
+  segarkanStatusCloud();
+  catat("atur", "Pengaturan data bersama disimpan", c.perangkat);
+  simpan();
+  pesan("Pengaturan tersimpan");
+});
+
+document.getElementById("btnUjiCloud").addEventListener("click", async ()=>{
+  bacaFormCloud();
+  catatanCloud("Menghubungi server...");
+  try{
+    const r = await panggilCloud("uji");
+    catatanCloud(r.ok
+      ? "\u2705 Tersambung. " + (r.kunciSudahDipasang ? "Kunci di server sudah dipasang."
+          : "\u26a0\ufe0f Kunci di server BELUM dipasang - jalankan fungsi <b>pasangKunci</b> di Apps Script.")
+      : "\u274c " + esc(r.pesan || "Gagal"));
+    segarkanStatusCloud();
+  }catch(e){
+    catatanCloud("\u274c " + esc(e.message) +
+      "<br>Periksa: alamatnya diakhiri <b>/exec</b>, dan saat menerbitkan Web App, " +
+      "<b>Who has access</b> disetel ke <b>Anyone</b>.");
+  }
+});
+
+async function kirimKeCloud(paksa){
+  const c = bacaCloud();
+  catatanCloud("Mengirim...");
+  try{
+    const r = await panggilCloud("simpan", { data: db, versi: c.versi, perangkat: c.perangkat, paksa: !!paksa });
+    if(r.konflik){
+      const dari = r.perangkat ? " oleh " + esc(r.perangkat) : "";
+      catatanCloud("\u26a0\ufe0f Data di server sudah diperbarui" + dari +
+        (r.waktu ? " pada " + waktuPendek(r.waktu) : "") +
+        ".<br>Sebaiknya ambil dulu data server.");
+      if(confirm("Data di server lebih baru" + (r.perangkat ? " (dari " + r.perangkat + ")" : "") +
+                 ".\n\nTimpa dengan data perangkat ini?\n\n" +
+                 "Kalau ya, perubahan dari perangkat lain akan HILANG.\n" +
+                 "Batal = ambil dulu data server.")){
+        return kirimKeCloud(true);
+      }
+      return;
+    }
+    if(!r.ok){ catatanCloud("\u274c " + esc(r.pesan || "Gagal mengirim")); return; }
+    c.versi = r.versi; c.waktu = r.waktu; simpanCloud(c);
+    segarkanStatusCloud();
+    catat("data", "Data dikirim ke cloud", Math.round((r.ukuran||0)/1024) + " KB - versi " + r.versi);
+    simpan();
+    catatanCloud("\u2705 Terkirim. Versi " + r.versi + ", " + Math.round((r.ukuran||0)/1024) + " KB.");
+    pesan("Data terkirim");
+  }catch(e){
+    catatanCloud("\u274c " + esc(e.message));
+  }
+}
+document.getElementById("btnKirimCloud").addEventListener("click", ()=> kirimKeCloud(false));
+
+document.getElementById("btnAmbilCloud").addEventListener("click", async ()=>{
+  catatanCloud("Mengambil...");
+  try{
+    const r = await panggilCloud("ambil");
+    if(!r.ok){ catatanCloud("\u274c " + esc(r.pesan || "Gagal mengambil")); return; }
+    if(r.kosong){ catatanCloud("Server masih kosong - kirim dulu dari perangkat ini."); return; }
+    if(!confirm("Ambil data dari server?\n\n" +
+        "Seluruh data di perangkat ini akan DIGANTI oleh data server" +
+        (r.perangkat ? " yang dikirim " + r.perangkat : "") +
+        (r.waktu ? " pada " + waktuPendek(r.waktu) : "") + ".")) return;
+
+    const c = bacaCloud();
+    const logLama = (db.log||[]).slice(), kunciLama = db.kunci, masukLama = db.kunciMasuk;
+    db = Object.assign(kosong(), r.data);
+    const sudah = new Set((db.log||[]).map(x=>x.id));
+    db.log = (db.log||[]).concat(logLama.filter(x=>!sudah.has(x.id)))
+                         .sort((a,b)=>String(b.waktu).localeCompare(String(a.waktu)));
+    if(!db.kunci || !db.kunci.hash) db.kunci = kunciLama;
+    db.kunciMasuk = masukLama;          /* sandi perangkat ini yang tetap berlaku */
+    catat("data", "Data diambil dari cloud", "versi " + r.versi + (r.perangkat ? " - dari " + r.perangkat : ""));
+    simpan();
+    c.versi = r.versi; c.waktu = r.waktu; simpanCloud(c);
+    migrasiPembayaran(); isiProfil(); segarkanKartuKunci(); segarkanKartuMasuk();
+    isiDatalistPelanggan(); isiDatalistItem(); segarkanStatusCloud();
+    catatanCloud("\u2705 Data server versi " + r.versi + " dipakai.");
+    pesan("Data diambil");
+  }catch(e){
+    catatanCloud("\u274c " + esc(e.message));
+  }
+});
+
 /* ---------------- sandi masuk aplikasi ---------------- */
 const TANDA_MASUK = "notaToko.terbuka";
 
@@ -3147,6 +3327,7 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
   isiProfil();
   segarkanKartuKunci();
   segarkanKartuMasuk();
+  isiFormCloud();
   document.getElementById("gbNama").textContent = db.profil.nama || "Nota Toko";
   if(db.kunciMasuk && db.kunciMasuk.hash){
     const terbuka = (()=>{ try{ return sessionStorage.getItem(TANDA_MASUK)==="1"; }catch(e){ return false; } })();

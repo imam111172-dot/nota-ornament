@@ -1,0 +1,126 @@
+========================================
+ DATA BERSAMA LEWAT GOOGLE APPS SCRIPT
+========================================
+Setelah ini selesai, data toko tersimpan di spreadsheet milik Anda
+sendiri, dan beberapa perangkat bisa memakai data yang sama.
+
+Aplikasinya tetap di GitHub Pages seperti biasa. Yang berubah hanya
+tempat menyimpan datanya.
+
+Dikerjakan sekali saja, sekitar 10 menit.
+
+
+----------------------------------------
+ A. MEMBUAT JEMBATAN DATANYA
+----------------------------------------
+
+1. Buka https://script.google.com lalu masuk dengan akun Google Anda.
+
+2. Klik "New project" di kiri atas.
+
+3. Hapus seluruh isi editor yang muncul, lalu tempel isi berkas
+   Kode.gs yang ada di folder ini.
+
+4. Beri nama proyeknya, misalnya "Nota Toko".
+   Caranya: klik tulisan "Untitled project" di atas.
+
+5. Pasang kunci rahasianya:
+   - Di dalam kode, cari baris:
+        var KUNCI_PILIHAN_ANDA = 'ganti-dengan-kunci-rahasia-anda';
+   - Ganti tulisan di dalam tanda kutip dengan kunci karangan Anda
+     sendiri. Contoh: 'kunci-toko-ornament-2026'
+   - Panjangkan sedikit dan jangan mudah ditebak. Ini yang menjaga
+     data Anda.
+   - Di bagian atas editor, pilih fungsi "pasangKunci" pada kotak
+     daftar fungsi, lalu klik "Run".
+   - Google akan meminta izin. Pilih akun Anda, lalu "Advanced" ->
+     "Go to Nota Toko (unsafe)" -> "Allow".
+     Peringatan itu wajar: Google menampilkannya untuk semua skrip
+     buatan sendiri yang belum ditinjau.
+
+6. Terbitkan sebagai Web App:
+   - Klik "Deploy" -> "New deployment".
+   - Klik ikon roda gigi di kiri, pilih "Web app".
+   - Isi:
+        Execute as     : Me
+        Who has access : Anyone
+   - Klik "Deploy", lalu salin alamat yang muncul.
+     Bentuknya: https://script.google.com/macros/s/AKfy...../exec
+
+   Catatan tentang "Anyone": yang bisa dibuka siapa saja hanyalah
+   pintunya. Tanpa kunci rahasia Anda, permintaan akan ditolak.
+
+
+----------------------------------------
+ B. MENYAMBUNGKAN APLIKASI
+----------------------------------------
+Lakukan di SETIAP perangkat yang akan dipakai.
+
+1. Buka aplikasinya, masuk ke tab "Atur".
+
+2. Pada kartu "Data Bersama (Google Sheets)", isi:
+     Alamat Web App    : alamat yang tadi disalin
+     Kunci rahasia     : kunci yang tadi Anda karang
+     Nama perangkat    : misalnya "HP Kasir" atau "Laptop Pemilik"
+
+3. Tekan "Uji Sambungan". Harus muncul:
+     Tersambung. Kunci di server sudah dipasang.
+
+4. Tekan "Simpan Pengaturan".
+
+Kunci rahasia disimpan terpisah dari data toko, jadi TIDAK ikut
+terbawa saat Anda mengirim berkas cadangan ke orang lain.
+
+
+----------------------------------------
+ C. CARA MEMAKAI SEHARI-HARI
+----------------------------------------
+Pengiriman masih manual, dan memindahkan SELURUH data - bukan
+menggabungkan per transaksi. Karena itu biasakan:
+
+  Sebelum mulai bekerja : tekan "Ambil dari Cloud"
+  Setelah selesai       : tekan "Kirim ke Cloud"
+
+Kalau perangkat lain sudah mengirim lebih dulu, aplikasi akan
+MENAHAN pengiriman Anda dan memberi tahu siapa yang mengirim serta
+kapan. Data orang lain tidak akan tertimpa diam-diam.
+
+Kalau itu terjadi, pilihan teraman: tekan "Ambil dari Cloud" dulu,
+kerjakan ulang perubahan Anda, baru kirim lagi.
+
+Tersedia juga pilihan menimpa paksa, tetapi peringatannya jelas -
+perubahan dari perangkat lain akan hilang. Pakai hanya kalau Anda
+yakin data perangkat lain memang tidak diperlukan.
+
+
+----------------------------------------
+ D. MELIHAT DATANYA
+----------------------------------------
+Di editor Apps Script, pilih fungsi "lihatSpreadsheet" lalu "Run".
+Alamat spreadsheetnya muncul di panel "Execution log".
+
+Isi spreadsheet itu berupa potongan data mentah, bukan tabel yang
+enak dibaca. Jangan diubah manual - aplikasi yang mengurusnya.
+
+
+----------------------------------------
+ E. KALAU GAGAL TERSAMBUNG
+----------------------------------------
+Aplikasi menyebutkan alasannya di bawah tombol. Yang paling sering:
+
+  "Jawaban server tidak terbaca"
+      Alamatnya salah. Pastikan diakhiri /exec, bukan /dev.
+
+  "Kunci salah"
+      Kunci di aplikasi berbeda dengan yang dipasang di Apps Script.
+      Jalankan ulang fungsi pasangKunci, lalu samakan.
+
+  "Kunci di server BELUM dipasang"
+      Fungsi pasangKunci belum pernah dijalankan.
+
+  Gagal tanpa penjelasan
+      Saat menerbitkan, "Who has access" belum disetel ke "Anyone".
+
+Setiap kali Anda mengubah Kode.gs, terbitkan ulang lewat
+"Deploy" -> "Manage deployments" -> ikon pensil -> Version: "New
+version" -> "Deploy". Alamatnya tidak berubah.

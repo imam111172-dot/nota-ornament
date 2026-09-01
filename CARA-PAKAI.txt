@@ -300,7 +300,35 @@ kosong.
 
 
 ========================================
- H. PENTING - DATA ANDA
+ H. DATA BERSAMA BEBERAPA PERANGKAT
+========================================
+Data bisa disimpan di Google Sheets milik Anda sendiri, sehingga
+beberapa perangkat memakai data yang sama.
+
+Langkah pemasangannya ada di berkas terpisah:
+  apps-script/BACA-DULU.txt
+
+Ringkasnya: buat proyek di script.google.com, tempel isi
+apps-script/Kode.gs, pasang kunci rahasia, terbitkan sebagai Web
+App, lalu masukkan alamat dan kuncinya ke tab "Atur" pada setiap
+perangkat.
+
+CARA MEMAKAI SEHARI-HARI
+  Sebelum mulai bekerja : "Ambil dari Cloud"
+  Setelah selesai       : "Kirim ke Cloud"
+
+Pengiriman masih manual dan memindahkan SELURUH data, bukan
+menggabungkan per transaksi. Kalau perangkat lain sudah mengirim
+lebih dulu, aplikasi menahan pengiriman Anda dan menyebutkan siapa
+yang mengirim serta kapan - data orang lain tidak tertimpa
+diam-diam.
+
+Kunci rahasianya disimpan terpisah dari data toko, jadi tidak ikut
+terbawa saat Anda mengirim berkas cadangan ke orang lain.
+
+
+========================================
+ I. PENTING - DATA ANDA
 ========================================
 Data tersimpan di dalam browser perangkat yang dipakai, bukan
 di internet. Artinya:
