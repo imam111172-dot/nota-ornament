@@ -19,7 +19,7 @@ var BATAS_SEL = 40000;
    ============================================================ */
 
 function doGet(e) {
-  return tanggapi_({ aksi: 'uji' });
+  return tanggapi_({ aksi: 'uji' }, 'GET');
 }
 
 function doPost(e) {
@@ -29,15 +29,16 @@ function doPost(e) {
   } catch (err) {
     return balas_({ ok: false, pesan: 'Isi permintaan tidak terbaca' });
   }
-  return tanggapi_(permintaan);
+  return tanggapi_(permintaan, 'POST');
 }
 
-function tanggapi_(permintaan) {
+function tanggapi_(permintaan, cara) {
   var kunciAsli = PropertiesService.getScriptProperties().getProperty('KUNCI');
 
   if (permintaan.aksi === 'uji') {
     return balas_({
       ok: true,
+      via: cara,
       pesan: 'Jembatan data aktif',
       kunciSudahDipasang: !!kunciAsli
     });
@@ -51,11 +52,14 @@ function tanggapi_(permintaan) {
   }
 
   try {
-    if (permintaan.aksi === 'ambil') return balas_(ambil_());
-    if (permintaan.aksi === 'simpan') return balas_(simpan_(permintaan));
-    return balas_({ ok: false, pesan: 'Aksi tidak dikenal: ' + permintaan.aksi });
+    var hasil;
+    if (permintaan.aksi === 'ambil') hasil = ambil_();
+    else if (permintaan.aksi === 'simpan') hasil = simpan_(permintaan);
+    else hasil = { ok: false, pesan: 'Aksi tidak dikenal: ' + permintaan.aksi };
+    hasil.via = cara;
+    return balas_(hasil);
   } catch (err) {
-    return balas_({ ok: false, pesan: 'Galat di server: ' + err.message });
+    return balas_({ ok: false, via: cara, pesan: 'Galat di server: ' + err.message });
   }
 }
 
@@ -174,13 +178,19 @@ function simpan_(permintaan) {
    Ganti dulu isi variabel di bawah dengan kunci pilihan Anda. */
 
 function pasangKunci() {
+
+  /* GANTI HANYA BARIS DI BAWAH INI. Baris lainnya biarkan apa adanya. */
   var KUNCI_PILIHAN_ANDA = 'ganti-dengan-kunci-rahasia-anda';
 
-  if (KUNCI_PILIHAN_ANDA === 'ganti-dengan-kunci-rahasia-anda') {
-    throw new Error('Ganti dulu isi KUNCI_PILIHAN_ANDA di dalam fungsi ini.');
+  if (KUNCI_PILIHAN_ANDA.indexOf('ganti-dengan') === 0) {
+    throw new Error('Ganti dulu isi KUNCI_PILIHAN_ANDA pada baris di atas.');
+  }
+  if (KUNCI_PILIHAN_ANDA.length < 8) {
+    throw new Error('Kunci terlalu pendek. Pakai minimal 8 huruf atau angka.');
   }
   PropertiesService.getScriptProperties().setProperty('KUNCI', KUNCI_PILIHAN_ANDA);
-  Logger.log('Kunci terpasang. Salin kunci ini ke tab Atur pada aplikasi.');
+  Logger.log('Kunci terpasang: ' + KUNCI_PILIHAN_ANDA);
+  Logger.log('Salin kunci itu ke kolom "Kunci rahasia" pada tab Atur di aplikasi.');
 }
 
 /** Menampilkan alamat spreadsheet tempat data tersimpan. */

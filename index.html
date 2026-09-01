@@ -2805,8 +2805,32 @@ async function panggilCloud(aksi, muatan){
   });
   if(!res.ok) throw new Error("Server menjawab " + res.status);
   const teks = await res.text();
-  try{ return JSON.parse(teks); }
+  let objek;
+  try{ objek = JSON.parse(teks); }
   catch(e){ throw new Error("Jawaban server tidak terbaca - periksa alamat Web App"); }
+  objek.__mentah = teks;
+  return objek;
+}
+
+/* Apps Script kadang mengalihkan POST menjadi GET, sehingga isi kiriman
+   hilang di jalan dan yang berjalan justru doGet. Kalau itu terjadi,
+   jawabannya tidak memuat hasil penyimpanan - dan itu HARUS dianggap
+   gagal, bukan berhasil. */
+function periksaJawaban(r, aksi){
+  if(r.via === "GET" && aksi !== "uji"){
+    return "Permintaan sampai ke server sebagai GET, bukan POST, sehingga datanya " +
+           "hilang di jalan. Data BELUM tersimpan. Terbitkan ulang Web App-nya: " +
+           "<b>Deploy \u2192 Manage deployments \u2192 ikon pensil \u2192 Version: New version \u2192 Deploy</b>.";
+  }
+  if(aksi === "simpan" && typeof r.versi !== "number"){
+    return "Server menjawab tanpa nomor versi, jadi data BELUM tentu tersimpan." +
+           "<br><small>Jawaban server: " + esc(String(r.__mentah || "").slice(0, 200)) + "</small>";
+  }
+  if(aksi === "ambil" && !r.kosong && !r.data){
+    return "Server menjawab tanpa data." +
+           "<br><small>Jawaban server: " + esc(String(r.__mentah || "").slice(0, 200)) + "</small>";
+  }
+  return null;
 }
 
 document.getElementById("btnSimpanCloud").addEventListener("click", ()=>{
@@ -2822,8 +2846,9 @@ document.getElementById("btnUjiCloud").addEventListener("click", async ()=>{
   catatanCloud("Menghubungi server...");
   try{
     const r = await panggilCloud("uji");
+    const caraSampai = r.via ? " (permintaan sampai sebagai " + esc(r.via) + ")" : "";
     catatanCloud(r.ok
-      ? "\u2705 Tersambung. " + (r.kunciSudahDipasang ? "Kunci di server sudah dipasang."
+      ? "\u2705 Tersambung" + caraSampai + ". " + (r.kunciSudahDipasang ? "Kunci di server sudah dipasang."
           : "\u26a0\ufe0f Kunci di server BELUM dipasang - jalankan fungsi <b>pasangKunci</b> di Apps Script.")
       : "\u274c " + esc(r.pesan || "Gagal"));
     segarkanStatusCloud();
@@ -2853,6 +2878,8 @@ async function kirimKeCloud(paksa){
       return;
     }
     if(!r.ok){ catatanCloud("\u274c " + esc(r.pesan || "Gagal mengirim")); return; }
+    const salah = periksaJawaban(r, "simpan");
+    if(salah){ catatanCloud("\u274c " + salah); pesan("Gagal mengirim"); return; }
     c.versi = r.versi; c.waktu = r.waktu; simpanCloud(c);
     segarkanStatusCloud();
     catat("data", "Data dikirim ke cloud", Math.round((r.ukuran||0)/1024) + " KB - versi " + r.versi);
@@ -2870,6 +2897,8 @@ document.getElementById("btnAmbilCloud").addEventListener("click", async ()=>{
   try{
     const r = await panggilCloud("ambil");
     if(!r.ok){ catatanCloud("\u274c " + esc(r.pesan || "Gagal mengambil")); return; }
+    const salahAmbil = periksaJawaban(r, "ambil");
+    if(salahAmbil){ catatanCloud("\u274c " + salahAmbil); return; }
     if(r.kosong){ catatanCloud("Server masih kosong - kirim dulu dari perangkat ini."); return; }
     if(!confirm("Ambil data dari server?\n\n" +
         "Seluruh data di perangkat ini akan DIGANTI oleh data server" +
@@ -2879,6 +2908,7 @@ document.getElementById("btnAmbilCloud").addEventListener("click", async ()=>{
     const c = bacaCloud();
     const logLama = (db.log||[]).slice(), kunciLama = db.kunci, masukLama = db.kunciMasuk;
     db = Object.assign(kosong(), r.data);
+    delete db.__mentah;
     const sudah = new Set((db.log||[]).map(x=>x.id));
     db.log = (db.log||[]).concat(logLama.filter(x=>!sudah.has(x.id)))
                          .sort((a,b)=>String(b.waktu).localeCompare(String(a.waktu)));
