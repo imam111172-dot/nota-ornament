@@ -137,6 +137,14 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 .kolomPilih:focus{outline:2px solid var(--brand);outline-offset:-1px}
 
 /* daftar di dalam popup - digulir seperti daftar biasa, tanpa rebutan fokus */
+/* Pemilih dirapatkan ke atas layar: papan ketik muncul dari bawah,
+   jadi daftar yang menempel ke bawah akan tertutup olehnya. */
+#modalPilih{align-items:flex-start}
+#modalPilih .modalIsi{border-radius:0 0 var(--r) var(--r);
+  padding-top:calc(14px + env(safe-area-inset-top))}
+@media(min-width:520px){#modalPilih{align-items:flex-start;padding-top:24px}
+  #modalPilih .modalIsi{border-radius:var(--r)}}
+
 .daftarPilih{margin-top:12px;border-top:1px solid var(--line);
   max-height:330px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
 @media (max-height:640px){.daftarPilih{max-height:240px}}
@@ -253,6 +261,7 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 
   <div class="card">
     <div id="listKeranjang"></div>
+    <button class="block" id="btnTambahBarang" style="margin-top:10px">➕ Tambah Barang</button>
 
     <div class="row2 duaKolom" style="margin-top:16px">
       <div>
@@ -1788,21 +1797,35 @@ function gambarDaftarPilih(){
     (x.kanan ? `<span class="kanan">${esc(x.kanan)}</span>` : "") + `</div>`).join("");
 
   const wadah = document.getElementById("mpDaftar");
-  wadah.innerHTML = isi || `<div class="kosong">Tidak ada yang cocok.</div>`;
+  if(!isi){
+    const belumAda = !pilihAktif.ambilDaftar().length;
+    isi = `<div class="kosong">` + (
+      belumAda
+        ? (pilihAktif.bolehBebas
+            ? "Daftarnya masih kosong.<br>Ketik namanya di kotak atas, lalu pilih baris hijau yang muncul."
+            : "Katalog masih kosong.<br>Isi dulu lewat tab \ud83d\udecd\ufe0f Katalog.")
+        : (pilihAktif.bolehBebas
+            ? "Tidak ada yang cocok.<br>Terus ketik untuk memakai nama baru."
+            : "Tidak ada yang cocok.")
+    ) + `</div>`;
+  }
+  wadah.innerHTML = isi;
   wadah.querySelectorAll(".baris").forEach(el=>{
     el.addEventListener("click", ()=>{
-      if(el.dataset.bebas) selesaiPilih({ label: q });
-      else selesaiPilih(L[Number(el.dataset.i)]);
+      if(el.dataset.bebas) selesaiPilih({ label: q }, true);
+      else selesaiPilih(L[Number(el.dataset.i)], false);
     });
   });
 }
 
-function selesaiPilih(item){
+function selesaiPilih(item, baru){
   if(!item || !pilihAktif) return;
-  const { inp, saatPilih } = pilihAktif;
+  const { inp, saatPilih, saatBaru } = pilihAktif;
   inp.value = item.label;
+  const laksana = saatPilih, laksanaBaru = saatBaru;
   tutupPilih();
-  if(saatPilih) saatPilih(item);
+  if(baru && laksanaBaru) laksanaBaru(item.label);
+  if(laksana) laksana(item);
 }
 
 function tutupPilih(){
@@ -1987,6 +2010,13 @@ function hitungTampilNota(){
 ["dNilai","dTipe"].forEach(id=> document.getElementById(id).addEventListener("input", hitungTampilNota));
 document.getElementById("dTipe").addEventListener("change", hitungTampilNota);
 document.getElementById("nDp").addEventListener("input", hitungTampilNota);
+
+/* dari daftar isi nota, langsung buka pemilih barang tanpa menggulir ke atas */
+document.getElementById("btnTambahBarang").addEventListener("click", ()=>{
+  const kartu = document.getElementById("cariItem").closest(".card");
+  if(kartu) kartu.scrollIntoView({ behavior: "smooth", block: "start" });
+  document.getElementById("cariItem").click();
+});
 
 document.getElementById("btnKosongkan").addEventListener("click", ()=>{
   if(!keranjang.length) return;
@@ -3271,7 +3301,14 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     judul: "\ud83d\udc65 Pilih Pelanggan",
     bolehBebas: true,
     ambilDaftar: ()=> db.pelanggan.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
-                        .map(x=>({label:x.nama, kanan:x.hp || ""}))
+                        .map(x=>({label:x.nama, kanan:x.hp || ""})),
+    /* nama baru langsung tercatat, tidak menunggu notanya disimpan */
+    saatBaru: (nama)=>{
+      if(cariPelanggan(nama)) return;
+      pastikanPelanggan(nama);
+      simpan();
+      pesan("\ud83d\udc65 " + nama + " ditambahkan ke daftar pelanggan");
+    }
   });
 
   pasangSaran("cariItem", {
