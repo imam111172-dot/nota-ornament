@@ -1,7 +1,11 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" translate="no">
 <head>
 <meta charset="UTF-8">
+<!-- Penerjemah otomatis peramban mengubah teks di layar, termasuk nama
+     pelanggan dan kata status seperti LUNAS. Kalau teks itu lalu disalin
+     atau dikirim, yang sampai ke pelanggan adalah hasil terjemahan. -->
+<meta name="google" content="notranslate">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0f766e">
 <meta name="mobile-web-app-capable" content="yes">
@@ -782,6 +786,12 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 /* ==========================================================
    PENYIMPANAN
    ========================================================== */
+/* Teks kiriman disimpan apa adanya di sini, lalu dipakai saat menyalin,
+   mengirim, dan mencetak. Membacanya kembali dari layar berbahaya:
+   penerjemah peramban mengubah isi layar, sehingga yang terkirim ke
+   pelanggan bisa berbeda dari yang tercatat. */
+const teksSiapKirim = { nota: "", katalog: "", laporan: "", pelanggan: "" };
+
 const KEY = "notaToko.v1";
 const kosong = () => ({
   profil:{nama:"",alamat:"",wa:"",jam:"",penyusun:"",saldoAwal:0,tglMulai:""},
@@ -1593,12 +1603,13 @@ function teksKatalog(){
 document.getElementById("btnPdfKatalog").addEventListener("click", bagikanPdfKatalog);
 document.getElementById("btnBuatKatalog").addEventListener("click", ()=>{
   if(!db.katalog.length){ pesan("Katalog masih kosong"); return; }
-  document.getElementById("hasilKatalog").textContent = teksKatalog();
+  teksSiapKirim.katalog = teksKatalog();
+  document.getElementById("hasilKatalog").textContent = teksSiapKirim.katalog;
   document.getElementById("boxKatalog").classList.remove("hide");
   pesan("✅ Teks katalog dibuat");
 });
-document.getElementById("btnSalinKatalog").addEventListener("click", ()=> salin(document.getElementById("hasilKatalog").textContent));
-document.getElementById("btnWaKatalog").addEventListener("click", ()=> kirimWa(document.getElementById("hasilKatalog").textContent));
+document.getElementById("btnSalinKatalog").addEventListener("click", ()=> salin(teksSiapKirim.katalog));
+document.getElementById("btnWaKatalog").addEventListener("click", ()=> kirimWa(teksSiapKirim.katalog));
 
 /* ==========================================================
    PELANGGAN
@@ -1769,12 +1780,13 @@ function teksPelanggan(){
 }
 document.getElementById("btnBuatPelanggan").addEventListener("click", ()=>{
   if(!db.pelanggan.length){ pesan("Daftar pelanggan masih kosong"); return; }
-  document.getElementById("hasilPelanggan").textContent = teksPelanggan();
+  teksSiapKirim.pelanggan = teksPelanggan();
+  document.getElementById("hasilPelanggan").textContent = teksSiapKirim.pelanggan;
   document.getElementById("boxPelanggan").classList.remove("hide");
   pesan("✅ Daftar dibuat");
 });
-document.getElementById("btnSalinPelanggan").addEventListener("click", ()=> salin(document.getElementById("hasilPelanggan").textContent));
-document.getElementById("btnWaDaftarPelanggan").addEventListener("click", ()=> kirimWa(document.getElementById("hasilPelanggan").textContent));
+document.getElementById("btnSalinPelanggan").addEventListener("click", ()=> salin(teksSiapKirim.pelanggan));
+document.getElementById("btnWaDaftarPelanggan").addEventListener("click", ()=> kirimWa(teksSiapKirim.pelanggan));
 
 /* ==========================================================
    POPUP PEMILIH
@@ -2347,7 +2359,8 @@ function teksNota(n){
 let notaAktif = null;
 function tampilkanNota(n){
   notaAktif = n;
-  document.getElementById("hasilNota").textContent = teksNota(n);
+  teksSiapKirim.nota = teksNota(n);
+  document.getElementById("hasilNota").textContent = teksSiapKirim.nota;
   document.getElementById("boxNota").classList.remove("hide");
   const p = cariPelanggan(n.pelanggan);
   const btn = document.getElementById("btnWaPelanggan");
@@ -2359,16 +2372,16 @@ function tampilkanNota(n){
   }
 }
 document.getElementById("btnPdfNota").addEventListener("click", bagikanPdfNota);
-document.getElementById("btnSalinNota").addEventListener("click", ()=> salin(document.getElementById("hasilNota").textContent));
-document.getElementById("btnWaNota").addEventListener("click", ()=> kirimWa(document.getElementById("hasilNota").textContent));
+document.getElementById("btnSalinNota").addEventListener("click", ()=> salin(teksSiapKirim.nota));
+document.getElementById("btnWaNota").addEventListener("click", ()=> kirimWa(teksSiapKirim.nota));
 document.getElementById("btnWaPelanggan").addEventListener("click", ()=>{
   const p = notaAktif ? cariPelanggan(notaAktif.pelanggan) : null;
   const no = p ? normalHp(p.hp) : "";
   if(!no){ pesan("Nomor HP pelanggan belum diisi"); return; }
-  window.open(`https://wa.me/${no}?text=` + encodeURIComponent(document.getElementById("hasilNota").textContent), "_blank");
+  window.open(`https://wa.me/${no}?text=` + encodeURIComponent(teksSiapKirim.nota), "_blank");
 });
 document.getElementById("btnCetakNota").addEventListener("click", ()=>{
-  document.getElementById("cetakArea").textContent = document.getElementById("hasilNota").textContent;
+  document.getElementById("cetakArea").textContent = teksSiapKirim.nota;
   window.print();
 });
 
@@ -2821,13 +2834,14 @@ document.getElementById("btnBuatLaporan").addEventListener("click", ()=>{
   const dari = document.getElementById("lDari").value, sampai = document.getElementById("lSampai").value;
   if(!dari || !sampai){ pesan("Pilih periode dulu"); return; }
   if(dari > sampai){ pesan("Tanggal 'Dari' melebihi 'Sampai'"); return; }
-  document.getElementById("hasilLaporan").textContent = teksLaporan(dari, sampai);
+  teksSiapKirim.laporan = teksLaporan(dari, sampai);
+  document.getElementById("hasilLaporan").textContent = teksSiapKirim.laporan;
   document.getElementById("boxLaporan").classList.remove("hide");
   pesan("✅ Laporan dibuat");
   document.getElementById("boxLaporan").scrollIntoView({behavior:"smooth", block:"start"});
 });
-document.getElementById("btnSalinLaporan").addEventListener("click", ()=> salin(document.getElementById("hasilLaporan").textContent));
-document.getElementById("btnWaLaporan").addEventListener("click", ()=> kirimWa(document.getElementById("hasilLaporan").textContent));
+document.getElementById("btnSalinLaporan").addEventListener("click", ()=> salin(teksSiapKirim.laporan));
+document.getElementById("btnWaLaporan").addEventListener("click", ()=> kirimWa(teksSiapKirim.laporan));
 
 /* ==========================================================
    PENGATURAN
