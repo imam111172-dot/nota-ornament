@@ -143,11 +143,11 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
 /* daftar di dalam popup - digulir seperti daftar biasa, tanpa rebutan fokus */
 /* Pemilih dirapatkan ke atas layar: papan ketik muncul dari bawah,
    jadi daftar yang menempel ke bawah akan tertutup olehnya. */
-#modalPilih{align-items:flex-start}
-#modalPilih .modalIsi{border-radius:0 0 var(--r) var(--r);
+#modalPilih,#modalBarangBaru{align-items:flex-start}
+#modalPilih .modalIsi,#modalBarangBaru .modalIsi{border-radius:0 0 var(--r) var(--r);
   padding-top:calc(14px + env(safe-area-inset-top))}
-@media(min-width:520px){#modalPilih{align-items:flex-start;padding-top:24px}
-  #modalPilih .modalIsi{border-radius:var(--r)}}
+@media(min-width:520px){#modalPilih,#modalBarangBaru{align-items:flex-start;padding-top:24px}
+  #modalPilih .modalIsi,#modalBarangBaru .modalIsi{border-radius:var(--r)}}
 
 .daftarPilih{margin-top:12px;border-top:1px solid var(--line);
   max-height:330px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
@@ -733,6 +733,44 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
     <div class="btnrow">
       <button class="primary" id="btnSalinLog">📋 Salin Log</button>
       <button id="btnTutupLog">Tutup &amp; Kunci</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ barang / jasa baru dari layar kasir ============ -->
+<div class="modal hide" id="modalBarangBaru">
+  <div class="modalIsi">
+    <h2>➕ Barang / Jasa Baru</h2>
+    <div class="note" style="margin-top:0">Langsung tercatat di katalog, sekaligus masuk ke nota ini.</div>
+
+    <label for="bbNama">Nama</label>
+    <input type="text" id="bbNama" autocomplete="off">
+
+    <label for="bbJenis">Jenis</label>
+    <select id="bbJenis">
+      <option value="barang">📦 Barang</option>
+      <option value="jasa">🛠️ Jasa</option>
+    </select>
+
+    <div class="row2">
+      <div><label for="bbHarga">Harga (Rp)</label>
+        <input type="text" id="bbHarga" inputmode="numeric" class="uang" placeholder="0"></div>
+      <div><label for="bbSatuan">Satuan</label>
+        <input type="text" id="bbSatuan" autocomplete="off" value="pcs"></div>
+    </div>
+
+    <div class="row2" id="bbStokBox">
+      <div><label for="bbStok">Stok awal</label>
+        <input type="text" id="bbStok" inputmode="decimal" placeholder="kosongkan bila tidak dilacak"></div>
+      <div><label for="bbJumlah">Jumlah untuk nota</label>
+        <input type="text" id="bbJumlah" inputmode="decimal" value="1"></div>
+    </div>
+
+    <div class="note" id="bbPesan"></div>
+
+    <div class="btnrow">
+      <button class="primary" id="bbSimpan">💾 Simpan &amp; Masukkan</button>
+      <button id="bbBatal">Batal</button>
     </div>
   </div>
 </div>
@@ -1809,6 +1847,10 @@ function gambarDaftarPilih(){
     isi += `<div class="baris" data-bebas="1"><span class="bebas">Pakai "${esc(q)}"</span>` +
            `<span class="kanan">baru</span></div>`;
   }
+  if(pilihAktif.saatBuatBaru && q && !cocokPersis){
+    isi += `<div class="baris" data-buat="1"><span class="bebas">\u2795 Buat baru: "${esc(q)}"</span>` +
+           `<span class="kanan">isi harga</span></div>`;
+  }
   isi += L.slice(0, 300).map((x,i)=>
     `<div class="baris" data-i="${i}"><span>${esc(x.label)}</span>` +
     (x.kanan ? `<span class="kanan">${esc(x.kanan)}</span>` : "") + `</div>`).join("");
@@ -1829,7 +1871,12 @@ function gambarDaftarPilih(){
   wadah.innerHTML = isi;
   wadah.querySelectorAll(".baris").forEach(el=>{
     el.addEventListener("click", ()=>{
-      if(el.dataset.bebas) selesaiPilih({ label: q }, true);
+      if(el.dataset.buat){
+        const buat = pilihAktif.saatBuatBaru;
+        tutupPilih();
+        buat(q);
+      }
+      else if(el.dataset.bebas) selesaiPilih({ label: q }, true);
       else selesaiPilih(L[Number(el.dataset.i)], false);
     });
   });
@@ -1875,6 +1922,69 @@ document.getElementById("mpCari").addEventListener("keydown", e=>{
 document.getElementById("mpTutup").addEventListener("click", tutupPilih);
 document.getElementById("modalPilih").addEventListener("click", e=>{
   if(e.target.id === "modalPilih") tutupPilih();
+});
+
+/* ==========================================================
+   BARANG / JASA BARU LANGSUNG DARI LAYAR KASIR
+   ========================================================== */
+function aturKolomStokBaru(){
+  document.getElementById("bbStokBox").classList.toggle(
+    "hide", document.getElementById("bbJenis").value !== "barang");
+}
+document.getElementById("bbJenis").addEventListener("change", aturKolomStokBaru);
+
+function bukaBarangBaru(nama){
+  document.getElementById("bbNama").value = nama || "";
+  document.getElementById("bbJenis").value = "barang";
+  document.getElementById("bbHarga").value = "";
+  document.getElementById("bbSatuan").value = "pcs";
+  document.getElementById("bbStok").value = "";
+  const jml = bacaQtyCepat();
+  document.getElementById("bbJumlah").value = jml > 0 ? angka(jml) : "1";
+  document.getElementById("bbPesan").textContent = "";
+  aturKolomStokBaru();
+  document.getElementById("modalBarangBaru").classList.remove("hide");
+  setTimeout(()=>document.getElementById("bbHarga").focus(), 60);
+}
+function tutupBarangBaru(){
+  document.getElementById("modalBarangBaru").classList.add("hide");
+}
+document.getElementById("bbBatal").addEventListener("click", tutupBarangBaru);
+document.getElementById("modalBarangBaru").addEventListener("click", e=>{
+  if(e.target.id === "modalBarangBaru") tutupBarangBaru();
+});
+
+document.getElementById("bbSimpan").addEventListener("click", ()=>{
+  const pesanEl = document.getElementById("bbPesan");
+  const nama = document.getElementById("bbNama").value.trim();
+  const jenis = document.getElementById("bbJenis").value;
+  const harga = nilaiUang(document.getElementById("bbHarga"));
+  const satuan = document.getElementById("bbSatuan").value.trim() || "pcs";
+  const jumlah = bersihAngka(document.getElementById("bbJumlah").value);
+
+  if(!nama){ pesanEl.textContent = "Nama belum diisi."; return; }
+  if(harga <= 0){ pesanEl.textContent = "Harga belum diisi."; return; }
+  if(jumlah <= 0){ pesanEl.textContent = "Jumlah untuk nota belum diisi."; return; }
+
+  const sudahAda = db.katalog.find(x => x.nama.trim().toLowerCase() === nama.toLowerCase());
+  if(sudahAda){ pesanEl.textContent = `"${nama}" sudah ada di katalog. Pilih dari daftar saja.`; return; }
+
+  const stokMentah = document.getElementById("bbStok").value.trim();
+  const it = {
+    id: uid(), jenis, nama, harga, satuan,
+    stok: (jenis === "barang" && stokMentah !== "") ? bersihAngka(stokMentah) : null,
+    stokMin: 0, desc: "", foto: ""
+  };
+  db.katalog.push(it);
+  catat("katalog", `Tambah ${jenis} "${nama}" dari layar kasir`,
+        `Harga ${rp(harga)} / ${satuan}` + (it.stok !== null ? ` \u00b7 stok awal ${angka(it.stok)}` : ""));
+  if(!simpan()) return;
+
+  gambarKatalog();
+  tambahKeKeranjang(it.id, jumlah);
+  document.getElementById("cariItem").value = "";
+  document.getElementById("qtyCepat").value = "0";
+  tutupBarangBaru();
 });
 
 /* Kolomnya dibuat hanya-baca supaya papan ketik tidak ikut terbuka di
@@ -3367,7 +3477,9 @@ if("serviceWorker" in navigator && location.protocol.startsWith("http")){
     ambilDaftar: ()=> db.katalog.slice().sort((a,b)=>a.nama.localeCompare(b.nama))
                         .map(x=>({label:x.nama,
                           kanan: rp(x.harga) + (stokDilacak(x) ? " \u00b7 sisa " + angka(stokNilai(x)) : "")})),
-    saatPilih: ()=> cekPilihanLangsung()
+    saatPilih: ()=> cekPilihanLangsung(),
+    /* barang yang belum ada bisa langsung dibuat tanpa pindah tab */
+    saatBuatBaru: (nama)=> bukaBarangBaru(nama)
   });
 
   pasangSaran("iSatuan", {
