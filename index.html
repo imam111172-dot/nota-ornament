@@ -1931,9 +1931,17 @@ document.getElementById("cariItem").addEventListener("keydown", e=>{
 document.getElementById("qtyCepat").addEventListener("keydown", e=>{
   if(e.key !== "Enter") return;
   e.preventDefault();
-  /* urutan boleh terbalik: nama dipilih dulu, jumlahnya menyusul */
   if(!cekPilihanLangsung()) document.getElementById("cariItem").focus();
 });
+
+/* Urutan pengisian bebas. Kalau namanya dipilih lebih dulu lalu jumlahnya
+   menyusul, barangnya ikut masuk begitu angkanya selesai diketik.
+   Dipicu oleh "change" (saat kolom ditinggalkan), bukan "input" - kalau
+   memakai input, mengetik "12" akan terbaca sebagai 1 lebih dulu. */
+document.getElementById("qtyCepat").addEventListener("change", ()=>{
+  if(document.getElementById("cariItem").value.trim()) cekPilihanLangsung();
+});
+
 
 function bacaQtyCepat(){
   return bersihAngka(document.getElementById("qtyCepat").value);
@@ -2057,6 +2065,11 @@ function nomorNota(tgl){
 }
 
 document.getElementById("btnSimpanNota").addEventListener("click", ()=>{
+  /* Barang yang masih tergantung di kolom atas dimasukkan lebih dulu,
+     supaya tidak terlewat hanya karena kolomnya belum ditinggalkan. */
+  if(document.getElementById("cariItem").value.trim() && bacaQtyCepat() > 0)
+    cekPilihanLangsung();
+
   if(!keranjang.length){ pesan("Isi nota masih kosong"); return; }
   const tgl = document.getElementById("nTgl").value || hariIni();
   const pelanggan = document.getElementById("nPelanggan").value.trim();
