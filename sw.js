@@ -1,5 +1,5 @@
 /* Service worker: menyimpan aplikasi agar bisa dibuka tanpa internet. */
-const CACHE = "nota-toko-v1";
+const CACHE = "nota-toko-v2";
 const ASET = [
   "./",
   "./index.html",
@@ -26,11 +26,26 @@ self.addEventListener("activate", e => {
   );
 });
 
-/* Jaringan dulu bila ada, jatuh ke cache bila offline. */
+/* Jaringan dulu bila ada, jatuh ke cache bila offline.
+   Halaman dan skrip diambil dengan no-store supaya tidak tertahan aturan
+   Cache-Control milik GitHub Pages (600 detik) - tanpa ini, pembaruan baru
+   terlihat sampai 10 menit kemudian. Gambar tetap boleh memakai cache
+   peramban karena jarang berubah. */
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+
+  const url = new URL(e.request.url);
+  const selaluSegar =
+    e.request.mode === "navigate" ||
+    /\.(html|js|webmanifest)$/i.test(url.pathname) ||
+    url.pathname.endsWith("/");
+
+  const permintaan = selaluSegar
+    ? new Request(e.request, { cache: "no-store" })
+    : e.request;
+
   e.respondWith(
-    fetch(e.request)
+    fetch(permintaan)
       .then(res => {
         const salinan = res.clone();
         caches.open(CACHE).then(c => c.put(e.request, salinan)).catch(() => {});

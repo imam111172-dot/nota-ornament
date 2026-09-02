@@ -594,6 +594,11 @@ nav button.on{color:var(--brand);background:var(--brand-soft)}
       Buka aplikasi ini di Chrome HP, lalu menu ⋮ → <b>Add to Home screen</b>. Setelah itu aplikasi punya ikon sendiri dan bisa dibuka tanpa internet.
     </div>
     <button class="primary block hide" id="btnInstall">📲 Pasang Sekarang</button>
+    <button class="block" id="btnPerbarui">🔄 Periksa Pembaruan</button>
+    <div class="note" id="infoPerbarui">
+      Tekan ini bila ada perubahan yang belum muncul. Aplikasi akan membuang
+      salinan lama lalu memuat versi terbaru. Data toko Anda tidak ikut terhapus.
+    </div>
   </div>
 
   <div class="card">
@@ -3272,6 +3277,24 @@ document.getElementById("btnInstall").addEventListener("click", async ()=>{
 window.addEventListener("appinstalled", ()=>{
   document.getElementById("infoInstall").textContent = "✅ Aplikasi sudah terpasang di perangkat ini.";
   document.getElementById("btnInstall").classList.add("hide");
+});
+
+document.getElementById("btnPerbarui").addEventListener("click", async ()=>{
+  const info = document.getElementById("infoPerbarui");
+  info.textContent = "Membuang salinan lama…";
+  try{
+    if("caches" in window){
+      const kunci = await caches.keys();
+      await Promise.all(kunci.map(k => caches.delete(k)));
+    }
+    if("serviceWorker" in navigator){
+      const daftar = await navigator.serviceWorker.getRegistrations();
+      await Promise.all(daftar.map(r => r.unregister()));
+    }
+  }catch(e){}
+  info.textContent = "Memuat versi terbaru…";
+  /* penanda waktu memaksa peramban mengambil berkas baru, bukan salinannya */
+  setTimeout(()=>{ location.replace(location.pathname + "?baru=" + Date.now()); }, 300);
 });
 
 if("serviceWorker" in navigator && location.protocol.startsWith("http")){
